@@ -66,8 +66,8 @@
             background-color: #3a7bc8;
         }
         .menu-image img {
-            width: 400px;
-            height: 600px;
+            width: 100%;
+            height: auto;
             border-radius: 8px;
             margin-bottom: 20px;
             cursor: pointer;
@@ -110,7 +110,7 @@
             margin-top: 20px;
             color: var(--primary-color);
         }
-        #exportButton, #clearButton {
+        #exportButton, #clearButton, #deleteSelectedButton {
             background-color: var(--secondary-color);
             color: white;
             padding: 12px 20px;
@@ -122,12 +122,53 @@
             margin-top: 20px;
             margin-right: 10px;
         }
-        #exportButton:hover, #clearButton:hover {
+        #exportButton:hover, #clearButton:hover, #deleteSelectedButton:hover {
             background-color: #e67e22;
         }
         .button-group {
             display: flex;
             justify-content: flex-start;
+            align-items: center;
+        }
+        select {
+            margin-left: 15px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .modal-content {
+            margin: 10% auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -149,9 +190,13 @@
             </div>
             <div class="menu-section">
                 <div class="menu-image">
-                    <img id="menuImage" src="/api/placeholder/600/400" alt="今日菜單" />
+                    <img id="menuImage" src="" alt="今日菜單" />
                 </div>
-                <button id="changeImageButton">更換圖片</button>
+                <button id="changeImageButton">上傳菜單</button>
+                <select id="imageSelector">
+                    <option value="">選擇圖片</option>
+                </select>
+                <input type="file" id="fileInput" style="display: none;">
             </div>
         </div>
 
@@ -159,10 +204,12 @@
         <table id="orderTable">
             <thead>
                 <tr>
+                    <th></th>
                     <th>No.</th>
                     <th>姓名</th>
                     <th>餐點</th>
                     <th>價格</th>
+                    <th>訂購時間</th>
                     <th>備註</th>
                 </tr>
             </thead>
@@ -174,13 +221,32 @@
         <div class="button-group">
             <button id="exportButton">導出訂單為 Excel</button>
             <button id="clearButton">清除資訊</button>
+            <button id="deleteSelectedButton">消除單筆資訊</button>
         </div>
     </div>
 
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-storage-compat.js"></script>
     <script>
-        let totalPrice = 0;
-        let orderCount = 0;
-        let orders = [];
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOBzaA0doSnAf6qHHprWhOBiOQipGDRNo",
+            authDomain: "drink-c4d22.firebaseapp.com",
+            projectId: "drink-c4d22",
+            storageBucket: "drink-c4d22.appspot.com",
+            messagingSenderId: "688183350540",
+            appId: "1:688183350540:web:29216ea997ffbadca1e529",
+            measurementId: "G-XJC1NXZ5PB"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
         function updateDateTime() {
             const now = new Date();
@@ -195,60 +261,81 @@
             document.getElementById('datetime').textContent = dateTimeString;
         }
 
-        function addOrder(name, meal, price, note) {
-            orderCount++;
-            const order = { name, meal, price: parseFloat(price), note };
-            orders.push(order);
-            totalPrice += order.price;
-            updateOrderTable();
-            updateTotalPrice();
-            saveOrdersToLocalStorage();
+        function addOrderToDatabase(order) {
+            db.collection("orders").add(order).then(() => {
+                loadOrdersFromDatabase();
+            }).catch((error) => {
+                console.error("Error adding order: ", error);
+            });
         }
 
-        function updateOrderTable() {
+        function loadOrdersFromDatabase() {
+            db.collection("orders").get().then((querySnapshot) => {
+                const orders = [];
+                querySnapshot.forEach((doc) => {
+                    orders.push({ id: doc.id, ...doc.data() });
+                });
+                orders.sort((a, b) => b.timestamp - a.timestamp); // 按照時間排序，時間越新的在越上面
+                updateOrderTable(orders);
+            }).catch((error) => {
+                console.error("Error getting orders: ", error);
+            });
+        }
+
+        function updateOrderTable(orders) {
             const tbody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
             tbody.innerHTML = '';
+            let totalPrice = 0;
             orders.forEach((order, index) => {
                 const row = tbody.insertRow();
+                const orderDate = new Date(order.timestamp);
+                const dateTimeString = orderDate.toLocaleString('zh-TW', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: false 
+                });
                 row.innerHTML = `
+                    <td><input type="checkbox" data-id="${order.id}"></td>
                     <td>${index + 1}</td>
                     <td>${order.name}</td>
                     <td>${order.meal}</td>
                     <td>$${order.price.toFixed(2)}</td>
+                    <td>${dateTimeString}</td>
                     <td>${order.note}</td>
                 `;
+                totalPrice += order.price;
             });
-        }
-
-        function updateTotalPrice() {
             document.getElementById('totalPrice').textContent = `總價格: $${totalPrice.toFixed(2)}`;
         }
 
-        function saveOrdersToLocalStorage() {
-            localStorage.setItem('orders', JSON.stringify(orders));
-            localStorage.setItem('totalPrice', totalPrice);
-            localStorage.setItem('orderCount', orderCount);
-        }
+        function deleteSelectedOrders() {
+            const checkboxes = document.querySelectorAll('#orderTable tbody input[type="checkbox"]:checked');
+            const ids = Array.from(checkboxes).map(checkbox => checkbox.getAttribute('data-id'));
 
-        function loadOrdersFromLocalStorage() {
-            const savedOrders = localStorage.getItem('orders');
-            if (savedOrders) {
-                orders = JSON.parse(savedOrders);
-                totalPrice = parseFloat(localStorage.getItem('totalPrice') || '0');
-                orderCount = parseInt(localStorage.getItem('orderCount') || '0');
-                updateOrderTable();
-                updateTotalPrice();
+            if (ids.length === 0) {
+                alert('請選擇要刪除的訂單。');
+                return;
             }
-        }
 
-        function clearOrders() {
-            if (confirm('確定要刪除所有訂單資訊嗎？')) {
-                orders = [];
-                totalPrice = 0;
-                orderCount = 0;
-                updateOrderTable();
-                updateTotalPrice();
-                saveOrdersToLocalStorage();
+            if (confirm('確定要刪除選中的訂單嗎？')) {
+                const password = prompt('請輸入密碼以刪除選中的訂單：');
+                if (password === '0841') {
+                    const batch = db.batch();
+                    ids.forEach(id => {
+                        const docRef = db.collection("orders").doc(id);
+                        batch.delete(docRef);
+                    });
+                    batch.commit().then(() => {
+                        loadOrdersFromDatabase();
+                    }).catch((error) => {
+                        console.error("Error deleting orders: ", error);
+                    });
+                } else {
+                    alert('密碼錯誤，無法刪除資料。');
+                }
             }
         }
 
@@ -256,9 +343,10 @@
             e.preventDefault();
             const name = this.elements['name'].value;
             const meal = this.elements['meal'].value;
-            const price = this.elements['price'].value;
+            const price = parseFloat(this.elements['price'].value);
             const note = this.elements['note'].value;
-            addOrder(name, meal, price, note);
+            const timestamp = Date.now();
+            addOrderToDatabase({ name, meal, price, note, timestamp });
             this.reset();
         });
 
@@ -278,7 +366,7 @@
             });
 
             // Add total price
-            csvContent += `"","","","",${document.getElementById('totalPrice').textContent}\n`;
+            csvContent += `"","","","","",${document.getElementById('totalPrice').textContent}\n`;
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
@@ -293,25 +381,127 @@
             }
         });
 
-        document.getElementById('clearButton').addEventListener('click', clearOrders);
+        document.getElementById('clearButton').addEventListener('click', function() {
+            if (confirm('確定要刪除所有訂單資訊嗎？')) {
+                const password = prompt('請輸入密碼以刪除所有訂單：');
+                if (password === '0841') {
+                    db.collection("orders").get().then((querySnapshot) => {
+                        const batch = db.batch();
+                        querySnapshot.forEach((doc) => {
+                            batch.delete(doc.ref);
+                        });
+                        return batch.commit();
+                    }).then(() => {
+                        loadOrdersFromDatabase();
+                    }).catch((error) => {
+                        console.error("Error clearing orders: ", error);
+                    });
+                } else {
+                    alert('密碼錯誤，無法清除資料。');
+                }
+            }
+        });
+        document.getElementById('deleteSelectedButton').addEventListener('click', deleteSelectedOrders);
 
         document.getElementById('changeImageButton').addEventListener('click', function() {
-            const imageUrl = prompt('請輸入圖片URL:');
+            const password = prompt('請輸入密碼以上傳圖片：');
+            if (password === '0841') {
+                document.getElementById('fileInput').click();
+            } else {
+                alert('密碼錯誤，無法上傳圖片。');
+            }
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const storageRef = storage.ref('menu/' + file.name);
+                storageRef.put(file).then((snapshot) => {
+                    snapshot.ref.getDownloadURL().then((url) => {
+                        db.collection("images").doc("menuImage").set({ url: url }).then(() => {
+                            document.getElementById('menuImage').src = url;
+                        });
+                    });
+                });
+            }
+        });
+
+        function loadMenuImage() {
+            db.collection("images").doc("menuImage").get().then((doc) => {
+                if (doc.exists) {
+                    document.getElementById('menuImage').src = doc.data().url;
+                }
+            });
+        }
+
+        function loadImageSelector() {
+            storage.ref('menu').listAll().then((result) => {
+                const selector = document.getElementById('imageSelector');
+                selector.innerHTML = '<option value="">選擇圖片</option>';
+                result.items.forEach((imageRef) => {
+                    imageRef.getDownloadURL().then((url) => {
+                        const option = document.createElement('option');
+                        option.value = url;
+                        option.textContent = imageRef.name;
+                        selector.appendChild(option);
+                    });
+                });
+            }).catch((error) => {
+                console.error("Error loading images: ", error);
+            });
+        }
+
+        document.getElementById('imageSelector').addEventListener('change', function() {
+            const imageUrl = this.value;
             if (imageUrl) {
-                const menuImage = document.getElementById('menuImage');
-                menuImage.src = imageUrl;
-                menuImage.onclick = function() {
-                    window.open(imageUrl, '_blank');
+                const password = prompt('請輸入密碼以更換圖片：');
+                if (password === '0841') {
+                    const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
+                    if (confirmChange) {
+                        db.collection("images").doc("menuImage").set({ url: imageUrl }).then(() => {
+                            document.getElementById('menuImage').src = imageUrl;
+                        }).catch((error) => {
+                            console.error("Error updating image URL: ", error);
+                        });
+                    } else {
+                        this.value = '';
+                    }
+                } else {
+                    alert('密碼錯誤，無法更換圖片。');
+                    this.value = '';
                 }
             }
         });
 
         // 初始化
         updateDateTime();
-        loadOrdersFromLocalStorage();
+        loadOrdersFromDatabase();
+        loadMenuImage();
+        loadImageSelector();
 
         // 每分鐘更新日期時間
         setInterval(updateDateTime, 60000);
+
+        // 圖片點擊放大功能
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const menuImage = document.getElementById('menuImage');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        menuImage.onclick = function() {
+            modal.style.display = "block";
+            modalImage.src = this.src;
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>
