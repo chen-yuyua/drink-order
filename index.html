@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>設計分室茶飲點餐系統</title>
+    <title>設計分室飲料點餐系統</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -28,9 +28,9 @@
         }
         h1 { 
             color: var(--primary-color);
-            font-size: 2em;
+            font-size: 2.5em;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
         .content-wrapper {
             display: flex;
@@ -41,16 +41,16 @@
             flex: 1;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
         }
         form {
             display: flex;
             flex-direction: column;
         }
-        input, textarea, button, select {
+        input, textarea, button {
             margin-bottom: 15px;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 16px;
@@ -70,11 +70,16 @@
             height: auto;
             border-radius: 8px;
             margin-bottom: 20px;
+            cursor: pointer;
+        }
+        h2 {
+            color: var(--primary-color);
+            margin-top: 0;
         }
         #datetime {
             text-align: center;
-            font-size: 1em;
-            color: var(--text-color);
+            font-size: 1.2em;
+            color: var(--primary-color);
             margin-bottom: 20px;
         }
         table {
@@ -82,12 +87,12 @@
             border-collapse: collapse;
             margin-top: 20px;
             background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
         }
         th, td {
-            padding: 12px;
+            padding: 15px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
         }
@@ -95,30 +100,81 @@
             background-color: var(--primary-color);
             color: white;
         }
+        tr:last-child td {
+            border-bottom: none;
+        }
         #totalPrice {
             text-align: right;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1.2em;
             margin-top: 20px;
             color: var(--primary-color);
+        }
+        #exportButton, #clearButton, #deleteSelectedButton {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+        #exportButton:hover, #clearButton:hover, #deleteSelectedButton:hover {
+            background-color: #e67e22;
         }
         .button-group {
             display: flex;
             justify-content: flex-start;
-            gap: 10px;
-            margin-top: 20px;
+            align-items: center;
         }
-        .button-group button {
-            background-color: var(--secondary-color);
+        select {
+            margin-left: 15px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
         }
-        .button-group button:hover {
-            background-color: #e67e22;
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .modal-content {
+            margin: 10% auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>設計分室茶飲點餐系統</h1>
+        <h1>設計分室飲料點餐系統</h1>
         <div id="datetime"></div>
         
         <div class="content-wrapper">
@@ -136,12 +192,10 @@
                 <div class="menu-image">
                     <img id="menuImage" src="" alt="今日菜單" />
                 </div>
-                <div>
-                    <button id="changeImageButton">上傳菜單</button>
-                    <select id="imageSelector">
-                        <option value="">選擇圖片</option>
-                    </select>
-                </div>
+                <button id="changeImageButton">上傳菜單</button>
+                <select id="imageSelector">
+                    <option value="">選擇圖片</option>
+                </select>
                 <input type="file" id="fileInput" style="display: none;">
             </div>
         </div>
@@ -150,13 +204,13 @@
         <table id="orderTable">
             <thead>
                 <tr>
+                    <th></th>
                     <th>No.</th>
                     <th>姓名</th>
                     <th>餐點</th>
                     <th>價格</th>
                     <th>訂購時間</th>
                     <th>備註</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -171,7 +225,294 @@
         </div>
     </div>
 
-    <!-- 省略 modal 和 script 部分，保持不變 -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-storage-compat.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOBza8v4DoSna4Fg6hjWrHO0biq0iDRNo",
+            authDomain: "drink-c4d22.firebaseapp.com",
+            projectId: "drink-c4d22",
+            storageBucket: "drink-c4d22.appspot.com",
+            messagingSenderId: "688183350540",
+            appId: "1:688183350540:web:29216ea997ffbadca1e529",
+            measurementId: "G-XCJINXZ5PB"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        function updateDateTime() {
+            const now = new Date();
+            const dateTimeString = now.toLocaleString('zh-TW', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false 
+            });
+            document.getElementById('datetime').textContent = dateTimeString;
+        }
+
+        function addOrderToDatabase(order) {
+            db.collection("orders").add(order).then(() => {
+                loadOrdersFromDatabase();
+            }).catch((error) => {
+                console.error("Error adding order: ", error);
+            });
+        }
+
+        function loadOrdersFromDatabase() {
+            db.collection("orders").get().then((querySnapshot) => {
+                const orders = [];
+                querySnapshot.forEach((doc) => {
+                    orders.push({ id: doc.id, ...doc.data() });
+                });
+                orders.sort((a, b) => b.timestamp - a.timestamp); // 按照時間排序，時間越新的在越上面
+                updateOrderTable(orders);
+            }).catch((error) => {
+                console.error("Error getting orders: ", error);
+            });
+        }
+
+        function updateOrderTable(orders) {
+            const tbody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            let totalPrice = 0;
+            orders.forEach((order, index) => {
+                const row = tbody.insertRow();
+                const orderDate = new Date(order.timestamp);
+                const dateTimeString = orderDate.toLocaleString('zh-TW', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: false 
+                });
+                row.innerHTML = `
+                    <td><input type="checkbox" data-id="${order.id}"></td>
+                    <td>${index + 1}</td>
+                    <td>${order.name}</td>
+                    <td>${order.meal}</td>
+                    <td>$${order.price.toFixed(2)}</td>
+                    <td>${dateTimeString}</td>
+                    <td>${order.note}</td>
+                `;
+                totalPrice += order.price;
+            });
+            document.getElementById('totalPrice').textContent = `總價格: $${totalPrice.toFixed(2)}`;
+        }
+
+        function deleteSelectedOrders() {
+            const checkboxes = document.querySelectorAll('#orderTable tbody input[type="checkbox"]:checked');
+            const ids = Array.from(checkboxes).map(checkbox => checkbox.getAttribute('data-id'));
+
+            if (ids.length === 0) {
+                alert('請選擇要刪除的訂單。');
+                return;
+            }
+
+            if (confirm('確定要刪除選中的訂單嗎？')) {
+                const password = prompt('請輸入密碼以刪除選中的訂單：');
+                if (password === '0841') {
+                    const batch = db.batch();
+                    ids.forEach(id => {
+                        const docRef = db.collection("orders").doc(id);
+                        batch.delete(docRef);
+                    });
+                    batch.commit().then(() => {
+                        loadOrdersFromDatabase();
+                    }).catch((error) => {
+                        console.error("Error deleting orders: ", error);
+                    });
+                } else {
+                    alert('密碼錯誤，無法刪除資料。');
+                }
+            }
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = this.elements['name'].value;
+            const meal = this.elements['meal'].value;
+            const price = parseFloat(this.elements['price'].value);
+            const note = this.elements['note'].value;
+            const timestamp = Date.now();
+            addOrderToDatabase({ name, meal, price, note, timestamp });
+            this.reset();
+        });
+
+        document.getElementById('exportButton').addEventListener('click', function() {
+            const table = document.getElementById('orderTable');
+            let csvContent = "\uFEFF"; // BOM for UTF-8
+
+            // Add headers
+            const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
+            csvContent += headers.join(',') + "\n";
+
+            // Add rows
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const rowData = Array.from(row.cells).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`);
+                csvContent += rowData.join(',') + "\n";
+            });
+
+            // Add total price
+            csvContent += `"","","","","",${document.getElementById('totalPrice').textContent}\n`;
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `lunch_orders_${new Date().toISOString().slice(0,10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+
+        document.getElementById('clearButton').addEventListener('click', function() {
+            if (confirm('確定要刪除所有訂單資訊嗎？')) {
+                const password = prompt('請輸入密碼以刪除所有訂單：');
+                if (password === '0841') {
+                    db.collection("orders").get().then((querySnapshot) => {
+                        const batch = db.batch();
+                        querySnapshot.forEach((doc) => {
+                            batch.delete(doc.ref);
+                        });
+                        return batch.commit();
+                    }).then(() => {
+                        loadOrdersFromDatabase();
+                    }).catch((error) => {
+                        console.error("Error clearing orders: ", error);
+                    });
+                } else {
+                    alert('密碼錯誤，無法清除資料。');
+                }
+            }
+        });
+        document.getElementById('deleteSelectedButton').addEventListener('click', deleteSelectedOrders);
+
+        document.getElementById('changeImageButton').addEventListener('click', function() {
+            const password = prompt('請輸入密碼以上傳圖片：');
+            if (password === '0841') {
+                document.getElementById('fileInput').click();
+            } else {
+                alert('密碼錯誤，無法上傳圖片。');
+            }
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const storageRef = storage.ref('menu/' + file.name);
+                storageRef.put(file).then((snapshot) => {
+                    snapshot.ref.getDownloadURL().then((url) => {
+                        db.collection("images").doc("menuImage").set({ url: url }).then(() => {
+                            document.getElementById('menuImage').src = url;
+                        });
+                    });
+                });
+            }
+        });
+
+        function loadMenuImage() {
+            db.collection("images").doc("menuImage").get().then((doc) => {
+                if (doc.exists) {
+                    document.getElementById('menuImage').src = doc.data().url;
+                }
+            });
+        }
+
+        function loadImageSelector() {
+            storage.ref('menu').listAll().then((result) => {
+                const selector = document.getElementById('imageSelector');
+                selector.innerHTML = '<option value="">選擇圖片</option>';
+                result.items.forEach((imageRef) => {
+                    imageRef.getDownloadURL().then((url) => {
+                        const option = document.createElement('option');
+                        option.value = url;
+                        option.textContent = imageRef.name;
+                        selector.appendChild(option);
+                    });
+                });
+            }).catch((error) => {
+                console.error("Error loading images: ", error);
+            });
+        }
+
+        document.getElementById('imageSelector').addEventListener('change', function() {
+            const imageUrl = this.value;
+            if (imageUrl) {
+                const password = prompt('請輸入密碼以更換圖片：');
+                if (password === '0841') {
+                    const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
+                    if (confirmChange) {
+                        db.collection("images").doc("menuImage").set({ url: imageUrl }).then(() => {
+                            document.getElementById('menuImage').src = imageUrl;
+                        }).catch((error) => {
+                            console.error("Error updating image URL: ", error);
+                        });
+                    } else {
+                        this.value = '';
+                    }
+                } else {
+                    alert('密碼錯誤，無法更換圖片。');
+                    this.value = '';
+                }
+            }
+        });
+
+        // 初始化
+        updateDateTime();
+        loadOrdersFromDatabase();
+        loadMenuImage();
+        loadImageSelector();
+
+        // 每分鐘更新日期時間
+        setInterval(updateDateTime, 60000);
+
+        // 圖片點擊放大功能
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const menuImage = document.getElementById('menuImage');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        menuImage.onclick = function() {
+            modal.style.display = "block";
+            modalImage.src = this.src;
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
