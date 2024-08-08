@@ -420,6 +420,7 @@
                     snapshot.ref.getDownloadURL().then((url) => {
                         db.collection("images").doc("menuImage").set({ url: url }).then(() => {
                             document.getElementById('menuImage').src = url;
+                            loadImageSelector(); // 更新圖片選擇框
                         });
                     });
                 });
