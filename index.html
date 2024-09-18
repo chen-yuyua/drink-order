@@ -253,6 +253,17 @@
             });
         }
 
+        // 更新繳費狀態
+        function updatePaymentStatus(orderId, paid) {
+            db.collection("orders").doc(orderId).update({
+                paid: paid
+            }).then(() => {
+                console.log("Payment status updated.");
+            }).catch((error) => {
+                console.error("Error updating payment status: ", error);
+            });
+        }
+
         // 從資料庫載入訂單
         function loadOrdersFromDatabase() {
             db.collection("orders").get().then((querySnapshot) => {
@@ -287,7 +298,7 @@
                 row.innerHTML = `
                     <td><input type="checkbox" data-id="${order.id}"></td>
                     <td>${index + 1}</td>
-                    <td class="checkbox-container"><input type="checkbox" class="paid-checkbox" onclick="confirmPayment(this)" /></td>
+                    <td class="checkbox-container"><input type="checkbox" class="paid-checkbox" ${order.paid ? 'checked' : ''} onclick="confirmPayment(this, '${order.id}')" /></td>
                     <td>${order.name}</td>
                     <td>${order.meal}</td>
                     <td>$${order.price.toFixed(2)}</td>
@@ -300,11 +311,13 @@
         }
 
         // 繳費確認
-        function confirmPayment(checkbox) {
+        function confirmPayment(checkbox, orderId) {
             if (confirm('是否確定已經繳費?')) {
                 checkbox.checked = true;
+                updatePaymentStatus(orderId, true);
             } else {
                 checkbox.checked = false;
+                updatePaymentStatus(orderId, false);
             }
         }
 
