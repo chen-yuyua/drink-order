@@ -248,7 +248,8 @@
         // 新增訂單到資料庫
         function addOrderToDatabase(order) {
             db.collection("orders").add(order).then(() => {
-                loadOrdersFromDatabase();
+                loadOrdersFromDatabase(); // 保證訂單顯示會更新
+                document.getElementById('orderForm').reset(); // 清除表單數據
             }).catch((error) => {
                 console.error("Error adding order: ", error);
             });
@@ -338,6 +339,16 @@
                 });
             }).catch((error) => {
                 console.error("Error loading images: ", error);
+            });
+
+            // 加載當前圖片
+            db.collection("images").doc("menuImage").get().then((doc) => {
+                if (doc.exists) {
+                    document.getElementById('menuImage').src = doc.data().url;
+                    imageSelector.value = doc.data().url;
+                }
+            }).catch((error) => {
+                console.error("Error loading current image: ", error);
             });
         }
 
