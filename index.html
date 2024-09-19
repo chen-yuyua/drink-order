@@ -255,6 +255,19 @@
             });
         }
 
+        // 處理表單提交
+        document.getElementById('orderForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // 防止頁面重新載入
+            const name = this.elements['name'].value;
+            const meal = this.elements['meal'].value;
+            const price = parseFloat(this.elements['price'].value);
+            const note = this.elements['note'].value;
+            const timestamp = Date.now();
+
+            // 將訂單資料保存到 Firebase
+            addOrderToDatabase({ name, meal, price, note, timestamp });
+        });
+
         // 更新繳費狀態
         function updatePaymentStatus(orderId, paid) {
             db.collection("orders").doc(orderId).update({
