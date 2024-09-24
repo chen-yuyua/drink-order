@@ -128,15 +128,13 @@
             width: 1024px;
             height: 768px;
             border-radius: 8px;
-            transition: transform 0.3s ease-in-out; /* 平滑過渡 */
+            transition: transform 0.3s ease-in-out;
         }
 
-        /* 當滑鼠懸停時，圖片放大 1.2 倍 */
         .menu-image img:hover {
-            transform: scale(1.7); /* 放大至 1.2 倍 */
+            transform: scale(1.7);
         }
 
-        /* Custom checkbox styling */
         .paid-checkbox {
             cursor: pointer;
             text-align: center;
@@ -153,7 +151,6 @@
             transition: background-color 0.3s;
         }
 
-        /* On checked */
         .paid-checkbox:checked {
             background-color: var(--primary-color);
         }
@@ -482,6 +479,11 @@
                     alert('密碼錯誤，無法刪除資料。');
                 }
             }
+        });
+
+        // 修正: 顯示文件上傳窗口
+        document.getElementById('changeImageButton').addEventListener('click', function () {
+            document.getElementById('fileInput').click(); // 觸發文件選擇視窗
         });
 
         // 初始化
