@@ -124,24 +124,53 @@
         }
 
         /* 修改菜單圖片容器樣式 */
-        .menu-image {
-            width: 1024px;
-            height: 768px;
-            overflow: hidden;
+        .menu-container {
+            width: 500px;
+            height: 700px;
             margin: 0 auto;
+            position: relative;
+            overflow: hidden;
         }
 
         /* 修改菜單圖片樣式 */
-        .menu-image img {
+        .menu-image {
             width: 100%;
             height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .menu-image img {
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
             transition: transform 0.3s ease-in-out;
         }
 
         /* 修改放大效果 */
-        .menu-image img:hover {
-            transform: scale(1.1);
+        .menu-container:hover .menu-image img {
+            transform: scale(1.6);
+        }
+
+        /* 新增放大視窗樣式 */
+        .enlarged-menu {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            padding: 20px;
+        }
+
+        .enlarged-menu img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
         }
 
         .paid-checkbox {
@@ -196,8 +225,13 @@
                 </form>
             </div>
             <div class="menu-section">
-                <div class="menu-image">
-                    <img id="menuImage" src="" alt="今日菜單" />
+                <div class="menu-container">
+                    <div class="menu-image">
+                        <img id="menuImage" src="" alt="今日菜單" />
+                    </div>
+                </div>
+                <div class="enlarged-menu">
+                    <img id="enlargedMenuImage" src="" alt="放大的菜單" />
                 </div>
                 <button id="changeImageButton">上傳菜單</button>
                 <select id="imageSelector">
@@ -377,17 +411,9 @@
             db.collection("images").doc("menuImage").get().then((doc) => {
                 if (doc.exists) {
                     const menuImage = document.getElementById('menuImage');
+                    const enlargedMenuImage = document.getElementById('enlargedMenuImage');
                     menuImage.src = doc.data().url;
-                    menuImage.onload = function() {
-                        const aspectRatio = this.naturalWidth / this.naturalHeight;
-                        if (aspectRatio > 1024 / 768) {
-                            this.style.width = '100%';
-                            this.style.height = 'auto';
-                        } else {
-                            this.style.width = 'auto';
-                            this.style.height = '100%';
-                        }
-                    };
+                    enlargedMenuImage.src = doc.data().url;
                     imageSelector.value = doc.data().url;
                 }
             }).catch((error) => {
@@ -504,6 +530,18 @@
         // 修正: 顯示文件上傳窗口
         document.getElementById('changeImageButton').addEventListener('click', function () {
             document.getElementById('fileInput').click(); // 觸發文件選擇視窗
+        });
+
+        // 新增放大菜單功能
+        const menuContainer = document.querySelector('.menu-container');
+        const enlargedMenu = document.querySelector('.enlarged-menu');
+
+        menuContainer.addEventListener('mouseenter', () => {
+            enlargedMenu.style.display = 'block';
+        });
+
+        menuContainer.addEventListener('mouseleave', () => {
+            enlargedMenu.style.display = 'none';
         });
 
         // 初始化
