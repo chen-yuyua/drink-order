@@ -538,6 +538,44 @@
             enlargedMenu.style.display = 'none';
         });
 
+        // 文件選擇後上傳到 Firebase Storage
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const password = prompt('請輸入密碼以上傳圖片：');
+            if (password !== '0841') {
+                alert('密碼錯誤，無法上傳圖片。');
+                return;
+            }
+
+            const storageRef = storage.ref(`menu/${file.name}`);
+            const uploadTask = storageRef.put(file);
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // 可以在這裡顯示上傳進度
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                }, 
+                (error) => {
+                    console.error("Error uploading file: ", error);
+                }, 
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        console.log('File available at', downloadURL);
+                        // 更新菜單圖片的 URL
+                        db.collection("images").doc("menuImage").set({ url: downloadURL }).then(() => {
+                            document.getElementById('menuImage').src = downloadURL;
+                            document.getElementById('enlargedMenuImage').src = downloadURL;
+                        }).catch((error) => {
+                            console.error("Error updating image URL: ", error);
+                        });
+                    });
+                }
+            );
+        });
+
         // 初始化
         updateDateTime();
         loadOrdersFromDatabase();
