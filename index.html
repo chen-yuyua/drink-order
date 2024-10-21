@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>設計分室飲料點餐系統 Ver1.1</title>
+    <title>設計分室飲料點餐系統 Ver1.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -123,7 +123,6 @@
             margin-right: 10px;
         }
 
-        /* 修改菜單圖片容器樣式 */
         .menu-container {
             width: 500px;
             height: 700px;
@@ -132,7 +131,6 @@
             overflow: hidden;
         }
 
-        /* 修改菜單圖片樣式 */
         .menu-image {
             width: 100%;
             height: 100%;
@@ -148,7 +146,6 @@
             object-fit: contain;
         }
 
-        /* 新增放大視窗樣式 */
         .enlarged-menu {
             display: none;
             position: fixed;
@@ -157,7 +154,7 @@
             transform: translate(-50%, -50%);
             z-index: 1000;
             background-color: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             padding: 20px;
         }
 
@@ -204,7 +201,7 @@
 
 <body>
     <div class="container">
-        <h1>設計分室飲料點餐系統 Ver1.1</h1>
+        <h1>設計分室飲料點餐系統 Ver1.2</h1>
         <div id="datetime"></div>
 
         <div class="content-wrapper">
@@ -241,7 +238,7 @@
                 <tr>
                     <th></th>
                     <th>No.</th>
-                    <th>已繳費</th>
+                    <th>已納費</th>
                     <th>姓名</th>
                     <th>餐點</th>
                     <th>價格</th>
@@ -315,7 +312,7 @@
             addOrderToDatabase({ name, meal, price, note, timestamp });
         });
 
-        // 更新繳費狀態
+        // 更新納費狀態
         function updatePaymentStatus(orderId, paid) {
             db.collection("orders").doc(orderId).update({
                 paid: paid
@@ -372,9 +369,9 @@
             document.getElementById('totalPrice').textContent = `總價格: $${totalPrice.toFixed(2)}`;
         }
 
-        // 繳費確認
+        // 納費確認
         function confirmPayment(checkbox, orderId) {
-            if (confirm('是否確定已經繳費?')) {
+            if (confirm('是否確定已經納費?')) {
                 checkbox.checked = true;
                 updatePaymentStatus(orderId, true);
             } else {
@@ -441,7 +438,7 @@
         // 導出訂單為 Excel
         document.getElementById('exportButton').addEventListener('click', function () {
             const table = document.getElementById('orderTable');
-            let csvContent = "\uFEFF"; // BOM for UTF-8
+            let csvContent = "﻿"; // BOM for UTF-8
 
             // Add headers
             const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
@@ -554,7 +551,6 @@
 
             uploadTask.on('state_changed', 
                 (snapshot) => {
-                    // 可以在這裡顯示上傳進度
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                     console.log('Upload is ' + progress + '% done');
                 }, 
@@ -564,10 +560,18 @@
                 () => {
                     uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                         console.log('File available at', downloadURL);
-                        // 更新菜單圖片的 URL
                         db.collection("images").doc("menuImage").set({ url: downloadURL }).then(() => {
                             document.getElementById('menuImage').src = downloadURL;
                             document.getElementById('enlargedMenuImage').src = downloadURL;
+
+                            const imageSelector = document.getElementById('imageSelector');
+                            const option = document.createElement('option');
+                            option.value = downloadURL;
+                            option.textContent = file.name;
+                            imageSelector.appendChild(option);
+
+                            imageSelector.value = downloadURL;
+
                         }).catch((error) => {
                             console.error("Error updating image URL: ", error);
                         });
