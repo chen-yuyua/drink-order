@@ -422,6 +422,7 @@
                     if (confirmChange) {
                         db.collection("images").doc("menuImage").set({ url: imageUrl }).then(() => {
                             document.getElementById('menuImage').src = imageUrl;
+document.getElementById('enlargedMenuImage').src = imageUrl;
                         }).catch((error) => {
                             console.error("Error updating image URL: ", error);
                         });
@@ -528,8 +529,9 @@
         const enlargedMenu = document.querySelector('.enlarged-menu');
 
         menuContainer.addEventListener('mouseenter', () => {
-            enlargedMenu.style.display = 'block';
-        });
+    enlargedMenu.style.display = 'block';
+    enlargedMenu.querySelector('img').src = document.getElementById('menuImage').src;
+});
 
         menuContainer.addEventListener('mouseleave', () => {
             enlargedMenu.style.display = 'none';
