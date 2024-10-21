@@ -528,14 +528,24 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
         const menuContainer = document.querySelector('.menu-container');
         const enlargedMenu = document.querySelector('.enlarged-menu');
 
-        menuContainer.addEventListener('mouseenter', () => {
+        menuContainer.addEventListener('mousemove', (e) => {
+    const zoomFactor = 4;
+    const radius = 20;
+    const rect = menuContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
     enlargedMenu.style.display = 'block';
+    enlargedMenu.style.width = `${radius * 2}px`;
+    enlargedMenu.style.height = `${radius * 2}px`;
+    enlargedMenu.style.clipPath = `circle(${radius}px at ${radius}px ${radius}px)`;
+    enlargedMenu.style.transform = `translate(${e.pageX - radius}px, ${e.pageY - radius}px) scale(${zoomFactor})`;
     enlargedMenu.querySelector('img').src = document.getElementById('menuImage').src;
 });
 
         menuContainer.addEventListener('mouseleave', () => {
-            enlargedMenu.style.display = 'none';
-        });
+    enlargedMenu.style.display = 'none';
+});
 
         // 文件選擇後上傳到 Firebase Storage
         document.getElementById('fileInput').addEventListener('change', function (event) {
