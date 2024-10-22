@@ -199,20 +199,25 @@
 
         .image-container {
             position: relative;
-            overflow: hidden;
             width: 300px; /* 圖片容器的寬度 */
-            height: 200px; /* 圖片容器的高度 */
+            height: 200px; /* 圖片容器的高 */
+            overflow: hidden;
         }
 
         .zoom-image {
-            transition: transform 0.2s ease;
             width: 100%;
             height: 100%;
-            transform-origin: center center;
         }
 
-        .image-container:hover .zoom-image {
-            transform: scale(4); /* 放大倍數為4倍 */
+        .circle {
+            position: absolute;
+            width: 10px; /* 直徑為10px */
+            height: 10px; /* 直徑為10px */
+            border: 3px solid red; /* 紅色線圈，粗細度為3px */
+            border-radius: 50%;
+            pointer-events: none; /* 確保圓圈不會阻擋滑鼠事件 */
+            transform: translate(-50%, -50%);
+            display: none; /* 初始狀態下隱藏 */
         }
     </style>
 </head>
@@ -240,7 +245,7 @@
                     </div>
                 </div>
                 <div class="enlarged-menu">
-                    <img id="enlargedMenuImage" src="" alt="放大的菜單" />
+                    <img id="enlargedMenuImage" src="" alt="放大的單" />
                 </div>
                 <button id="changeImageButton">上傳菜單</button>
                 <select id="imageSelector">
@@ -434,7 +439,7 @@
         document.getElementById('imageSelector').addEventListener('change', function () {
             const imageUrl = this.value;
             if (imageUrl) {
-                const password = prompt('請輸入密碼以更換圖片：');
+                const password = prompt('輸入密碼以更換圖片：');
                 if (password === '0841') {
                     const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
                     if (confirmChange) {
@@ -488,7 +493,7 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
 
         // 清除資訊
         document.getElementById('clearButton').addEventListener('click', function () {
-            if (confirm('確定要刪除所有訂單資訊嗎？')) {
+            if (confirm('確定要刪除所有單資訊嗎？')) {
                 const password = prompt('請輸入密碼以刪除所有訂單：');
                 if (password === '0841') {
                     db.collection("orders").get().then((querySnapshot) => {
@@ -618,6 +623,7 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
 
         const imageContainer = document.querySelector('.image-container');
         const zoomImage = document.querySelector('.zoom-image');
+        const circle = document.querySelector('.circle');
 
         imageContainer.addEventListener('mousemove', (e) => {
             const rect = imageContainer.getBoundingClientRect();
@@ -625,10 +631,14 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
             const y = e.clientY - rect.top;
 
             zoomImage.style.transformOrigin = `${x}px ${y}px`;
+            circle.style.left = `${x}px`;
+            circle.style.top = `${y}px`;
+            circle.style.display = 'block';
         });
 
         imageContainer.addEventListener('mouseleave', () => {
             zoomImage.style.transformOrigin = 'center center';
+            circle.style.display = 'none';
         });
     </script>
 </body>
