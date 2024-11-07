@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>設計分室飲料點餐系統 Ver1.2</title>
+    <title>設計分室飲料點餐系統 Ver1.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -144,6 +144,15 @@
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            transition: transform 0.3s, top 0.3s, left 0.3s;
+        }
+
+        .menu-image img.enlarged {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.6);
+            z-index: 1000;
         }
 
         .enlarged-menu {
@@ -224,7 +233,7 @@
 
 <body>
     <div class="container">
-        <h1>設計分室飲料點餐系統 Ver1.2</h1>
+        <h1>設計分室飲料點餐系統 Ver1.3</h1>
         <div id="datetime"></div>
 
         <div class="content-wrapper">
@@ -544,7 +553,7 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
 
         // 修正: 顯示文件上傳窗口
         document.getElementById('changeImageButton').addEventListener('click', function () {
-            document.getElementById('fileInput').click(); // 觸發文件選擇視窗
+            document.getElementById('fileInput').click(); // 觸發文件選視窗
         });
 
         // 新增放大菜單功能
@@ -639,6 +648,16 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
         imageContainer.addEventListener('mouseleave', () => {
             zoomImage.style.transformOrigin = 'center center';
             circle.style.display = 'none';
+        });
+
+        const menuImage = document.getElementById('menuImage');
+
+        menuImage.addEventListener('mouseenter', () => {
+            menuImage.classList.add('enlarged');
+        });
+
+        menuImage.addEventListener('mouseleave', () => {
+            menuImage.classList.remove('enlarged');
         });
     </script>
 </body>
