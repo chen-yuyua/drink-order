@@ -1,558 +1,589 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>設計分室飲料點餐系統 Ver1.3</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #f39c12;
-            --background-color: #f5f7fa;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>設計分室飲料點餐系統 Ver1.3</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4a90e2;
+      --secondary-color: #f39c12;
+      --background-color: #f5f7fa;
+      --text-color: #333333;
+      --border-color: #e0e0e0;
+    }
 
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+    }
 
-        h1 {
-            color: var(--primary-color);
-            font-size: 2.5em;
-            text-align: center;
-            margin-bottom: 40px;
-        }
+    h1 {
+      color: var(--primary-color);
+      font-size: 2.5em;
+      text-align: center;
+      margin-bottom: 40px;
+    }
 
-        .content-wrapper {
-            display: flex;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
+    .content-wrapper {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
 
-        .form-section,
-        .menu-section {
-            flex: 1;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-        }
+    .form-section,
+    .menu-section {
+      flex: 1;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
 
-        form {
-            display: flex;
-            flex-direction: column;
-        }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
 
-        input,
-        textarea,
-        button {
-            margin-bottom: 15px;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 16px;
-        }
+    input,
+    textarea,
+    button {
+      margin-bottom: 15px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 16px;
+    }
 
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-        button:hover {
-            background-color: #3a7bc8;
-        }
+    button:hover {
+      background-color: #3a7bc8;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-        th,
-        td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
+    th,
+    td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
 
-        th {
-            background-color: var(--primary-color);
-            color: white;
-        }
+    th {
+      background-color: var(--primary-color);
+      color: white;
+    }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+    tr:last-child td {
+      border-bottom: none;
+    }
 
-        #totalPrice {
-            text-align: right;
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-top: 20px;
-            color: var(--primary-color);
-        }
+    #totalPrice {
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: var(--primary-color);
+    }
 
-        .button-group {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-        }
+    .button-group {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
 
-        .button-group button {
-            margin-right: 10px;
-        }
+    .button-group button {
+      margin-right: 10px;
+    }
 
-        .menu-container {
-            width: 500px;
-            height: 700px;
-            margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-        }
+    /* 菜單圖片容器 */
+    .menu-container {
+      width: 500px;
+      height: 700px;
+      margin: 0 auto;
+      /* 為了讓放大特效不受容器裁切，取消 overflow:hidden */
+      /* overflow: hidden; */
+      position: relative;
+    }
 
-        .menu-image {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+    .menu-image {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* 此處不設定 overflow, 以免影響放大鏡效果 */
+    }
 
-        .menu-image img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: transform 0.3s ease;
-        }
+    .menu-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
 
-        /* 新增：滑鼠移入圖片顯示範圍時，圖片浮起並放大至 1.6 倍，並上移 10px */
-        .menu-image:hover img {
-            transform: translateY(-10px) scale(1.6);
-        }
-
-        .paid-checkbox {
-            cursor: pointer;
-            text-align: center;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--primary-color);
-            border-radius: 4px;
-            background-color: white;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background-color 0.3s;
-        }
-
-        .paid-checkbox:checked {
-            background-color: var(--primary-color);
-        }
-
-        .paid-checkbox:checked::after {
-            content: '✓';
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .checkbox-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
+    /* magnifier 放大鏡樣式，獨立於圖片容器 */
+    .magnifier {
+      position: fixed;
+      pointer-events: none;
+      width: 20px;       /* 直徑 20px，即半徑 10px */
+      height: 20px;
+      border: 2px solid red; /* 可自行調整邊框樣式 */
+      border-radius: 50%;
+      background-repeat: no-repeat;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      transform: scale(0); /* 初始隱藏 */
+      opacity: 0;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>設計分室飲料點餐系統 Ver1.3</h1>
-        <div id="datetime"></div>
+  <div class="container">
+    <h1>設計分室飲料點餐系統 Ver1.3</h1>
+    <div id="datetime"></div>
 
-        <div class="content-wrapper">
-            <div class="form-section">
-                <h2>訂餐表單</h2>
-                <form id="orderForm">
-                    <input type="text" name="name" placeholder="您的姓名" required>
-                    <input type="text" name="meal" placeholder="餐點名稱" required>
-                    <input type="number" name="price" placeholder="價格" step="0.01" min="0" required>
-                    <textarea name="note" placeholder="備註（如有特殊要求請填寫）" rows="3"></textarea>
-                    <button type="submit">提交訂單</button>
-                </form>
-            </div>
-            <div class="menu-section">
-                <div class="menu-container">
-                    <div class="menu-image">
-                        <img id="menuImage" src="" alt="今日菜單" />
-                    </div>
-                </div>
-                <button id="changeImageButton">上傳菜單</button>
-                <select id="imageSelector">
-                    <option value="">選擇圖片</option>
-                </select>
-                <input type="file" id="fileInput" style="display: none;">
-            </div>
+    <div class="content-wrapper">
+      <div class="form-section">
+        <h2>訂餐表單</h2>
+        <form id="orderForm">
+          <input type="text" name="name" placeholder="您的姓名" required>
+          <input type="text" name="meal" placeholder="餐點名稱" required>
+          <input type="number" name="price" placeholder="價格" step="0.01" min="0" required>
+          <textarea name="note" placeholder="備註（如有特殊要求請填寫）" rows="3"></textarea>
+          <button type="submit">提交訂單</button>
+        </form>
+      </div>
+      <div class="menu-section">
+        <div class="menu-container">
+          <div class="menu-image">
+            <img id="menuImage" src="" alt="今日菜單" />
+          </div>
         </div>
-
-        <h2>今日訂單</h2>
-        <table id="orderTable">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>No.</th>
-                    <th>已納費</th>
-                    <th>姓名</th>
-                    <th>餐點</th>
-                    <th>價格</th>
-                    <th>訂購時間</th>
-                    <th>備註</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div id="totalPrice">總價格: $0.00</div>
-        <div class="button-group">
-            <button id="exportButton">導出訂單為 Excel</button>
-            <button id="clearButton">清除資訊</button>
-            <button id="deleteSelectedButton">消除單筆資訊</button>
-        </div>
+        <button id="changeImageButton">上傳菜單</button>
+        <select id="imageSelector">
+          <option value="">選擇圖片</option>
+        </select>
+        <input type="file" id="fileInput" style="display: none;">
+      </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-storage-compat.js"></script>
-    <script>
-        // Firebase 配置
-        const firebaseConfig = {
-            apiKey: "AIzaSyBOBza8v4DoSna4Fg6hjWrHO0biq0iDRNo",
-            authDomain: "drink-c4d22.firebaseapp.com",
-            projectId: "drink-c4d22",
-            storageBucket: "drink-c4d22.appspot.com",
-            messagingSenderId: "688183350540",
-            appId: "1:688183350540:web:29216ea997ffbadca1e529",
-            measurementId: "G-XCJINXZ5PB"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+    <h2>今日訂單</h2>
+    <table id="orderTable">
+      <thead>
+        <tr>
+          <th></th>
+          <th>No.</th>
+          <th>已納費</th>
+          <th>姓名</th>
+          <th>餐點</th>
+          <th>價格</th>
+          <th>訂購時間</th>
+          <th>備註</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-        // 更新日期時間
-        function updateDateTime() {
-            const now = new Date();
-            const dateTimeString = now.toLocaleString('zh-TW', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
-            document.getElementById('datetime').textContent = dateTimeString;
+    <div id="totalPrice">總價格: $0.00</div>
+    <div class="button-group">
+      <button id="exportButton">導出訂單為 Excel</button>
+      <button id="clearButton">清除資訊</button>
+      <button id="deleteSelectedButton">消除單筆資訊</button>
+    </div>
+  </div>
+
+  <!-- magnifier 放大鏡元素，置於 body 中，不受容器限制 -->
+  <div id="magnifier" class="magnifier"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-storage-compat.js"></script>
+  <script>
+    // Firebase 配置
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOBza8v4DoSna4Fg6hjWrHO0biq0iDRNo",
+      authDomain: "drink-c4d22.firebaseapp.com",
+      projectId: "drink-c4d22",
+      storageBucket: "drink-c4d22.appspot.com",
+      messagingSenderId: "688183350540",
+      appId: "1:688183350540:web:29216ea997ffbadca1e529",
+      measurementId: "G-XCJINXZ5PB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // 更新日期時間
+    function updateDateTime() {
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      document.getElementById('datetime').textContent = dateTimeString;
+    }
+
+    // 新增訂單到資料庫
+    function addOrderToDatabase(order) {
+      db.collection("orders").add(order).then(() => {
+        loadOrdersFromDatabase(); // 更新訂單顯示
+        document.getElementById('orderForm').reset(); // 清除表單數據
+      }).catch((error) => {
+        console.error("Error adding order: ", error);
+      });
+    }
+
+    // 處理表單提交
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = this.elements['name'].value;
+      const meal = this.elements['meal'].value;
+      const price = parseFloat(this.elements['price'].value);
+      const note = this.elements['note'].value;
+      const timestamp = Date.now();
+
+      addOrderToDatabase({ name, meal, price, note, timestamp });
+    });
+
+    // 更新納費狀態
+    function updatePaymentStatus(orderId, paid) {
+      db.collection("orders").doc(orderId).update({
+        paid: paid
+      }).then(() => {
+        console.log("Payment status updated.");
+      }).catch((error) => {
+        console.error("Error updating payment status: ", error);
+      });
+    }
+
+    // 從資料庫載入訂單
+    function loadOrdersFromDatabase() {
+      db.collection("orders").get().then((querySnapshot) => {
+        const orders = [];
+        querySnapshot.forEach((doc) => {
+          orders.push({ id: doc.id, ...doc.data() });
+        });
+        orders.sort((a, b) => b.timestamp - a.timestamp);
+        updateOrderTable(orders);
+      }).catch((error) => {
+        console.error("Error getting orders: ", error);
+      });
+    }
+
+    // 更新訂單表格
+    function updateOrderTable(orders) {
+      const tbody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = '';
+      let totalPrice = 0;
+      orders.forEach((order, index) => {
+        const row = tbody.insertRow();
+        const orderDate = new Date(order.timestamp);
+        const dateTimeString = orderDate.toLocaleString('zh-TW', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+        row.innerHTML = `
+          <td><input type="checkbox" data-id="${order.id}"></td>
+          <td>${index + 1}</td>
+          <td class="checkbox-container">
+            <input type="checkbox" class="paid-checkbox" ${order.paid ? 'checked' : ''} onclick="confirmPayment(this, '${order.id}')" />
+          </td>
+          <td>${order.name}</td>
+          <td>${order.meal}</td>
+          <td>$${order.price.toFixed(2)}</td>
+          <td>${dateTimeString}</td>
+          <td>${order.note}</td>
+        `;
+        totalPrice += order.price;
+      });
+      document.getElementById('totalPrice').textContent = `總價格: $${totalPrice.toFixed(2)}`;
+    }
+
+    // 納費確認
+    function confirmPayment(checkbox, orderId) {
+      if (confirm('是否確定已經納費?')) {
+        checkbox.checked = true;
+        updatePaymentStatus(orderId, true);
+      } else {
+        checkbox.checked = false;
+        updatePaymentStatus(orderId, false);
+      }
+    }
+
+    // 載入圖片選單與當前菜單圖片
+    function loadImageSelector() {
+      const imageSelector = document.getElementById('imageSelector');
+      imageSelector.innerHTML = '<option value="">選擇圖片</option>';
+
+      storage.ref('menu').listAll().then((result) => {
+        result.items.forEach((imageRef) => {
+          imageRef.getDownloadURL().then((url) => {
+            const option = document.createElement('option');
+            option.value = url;
+            option.textContent = imageRef.name;
+            imageSelector.appendChild(option);
+          });
+        });
+      }).catch((error) => {
+        console.error("Error loading images: ", error);
+      });
+
+      // 加載當前圖片
+      db.collection("images").doc("menuImage").get().then((doc) => {
+        if (doc.exists) {
+          const menuImage = document.getElementById('menuImage');
+          menuImage.src = doc.data().url;
+          imageSelector.value = doc.data().url;
         }
+      }).catch((error) => {
+        console.error("Error loading current image: ", error);
+      });
+    }
 
-        // 新增訂單到資料庫
-        function addOrderToDatabase(order) {
-            db.collection("orders").add(order).then(() => {
-                loadOrdersFromDatabase(); // 更新訂單顯示
-                document.getElementById('orderForm').reset(); // 清除表單數據
+    // 當圖片選單變更時
+    document.getElementById('imageSelector').addEventListener('change', function() {
+      const imageUrl = this.value;
+      if (imageUrl) {
+        const password = prompt('輸入密碼以更換圖片：');
+        if (password === '0841') {
+          const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
+          if (confirmChange) {
+            db.collection("images").doc("menuImage").set({ url: imageUrl }).then(() => {
+              document.getElementById('menuImage').src = imageUrl;
             }).catch((error) => {
-                console.error("Error adding order: ", error);
+              console.error("Error updating image URL: ", error);
             });
+          } else {
+            this.value = '';
+          }
+        } else {
+          alert('密碼錯誤，無法更換圖片。');
+          this.value = '';
         }
+      }
+    });
 
-        // 處理表單提交
-        document.getElementById('orderForm').addEventListener('submit', function (e) {
-            e.preventDefault(); // 防止頁面重新載入
-            const name = this.elements['name'].value;
-            const meal = this.elements['meal'].value;
-            const price = parseFloat(this.elements['price'].value);
-            const note = this.elements['note'].value;
-            const timestamp = Date.now();
+    // 導出訂單為 Excel (CSV)
+    document.getElementById('exportButton').addEventListener('click', function() {
+      const table = document.getElementById('orderTable');
+      let csvContent = "﻿"; // BOM for UTF-8
 
-            // 將訂單資料保存到 Firebase
-            addOrderToDatabase({ name, meal, price, note, timestamp });
-        });
+      // 加入表頭
+      const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
+      csvContent += headers.join(',') + "\n";
 
-        // 更新納費狀態
-        function updatePaymentStatus(orderId, paid) {
-            db.collection("orders").doc(orderId).update({
-                paid: paid
-            }).then(() => {
-                console.log("Payment status updated.");
+      // 加入各行資料
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        const rowData = Array.from(row.cells).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`);
+        csvContent += rowData.join(',') + "\n";
+      });
+
+      // 加入總價格
+      csvContent += `"","","","","",${document.getElementById('totalPrice').textContent}\n`;
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `lunch_orders_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    });
+
+    // 清除所有訂單資訊
+    document.getElementById('clearButton').addEventListener('click', function() {
+      if (confirm('確定要刪除所有單資訊嗎？')) {
+        const password = prompt('請輸入密碼以刪除所有訂單：');
+        if (password === '0841') {
+          db.collection("orders").get().then((querySnapshot) => {
+            const batch = db.batch();
+            querySnapshot.forEach((doc) => {
+              batch.delete(doc.ref);
+            });
+            return batch.commit();
+          }).then(() => {
+            loadOrdersFromDatabase();
+          }).catch((error) => {
+            console.error("Error clearing orders: ", error);
+          });
+        } else {
+          alert('密碼錯誤，無法清除資料。');
+        }
+      }
+    });
+
+    // 刪除選中的訂單
+    document.getElementById('deleteSelectedButton').addEventListener('click', function() {
+      const checkboxes = document.querySelectorAll('#orderTable tbody input[type="checkbox"]:checked');
+      const ids = Array.from(checkboxes).map(checkbox => checkbox.getAttribute('data-id'));
+
+      if (ids.length === 0) {
+        alert('請選擇要刪除的訂單。');
+        return;
+      }
+
+      if (confirm('確定要刪除選中的訂單嗎？')) {
+        const password = prompt('請輸入密碼以刪除選中的訂單：');
+        if (password === '0841') {
+          const batch = db.batch();
+          ids.forEach(id => {
+            const docRef = db.collection("orders").doc(id);
+            batch.delete(docRef);
+          });
+          batch.commit().then(() => {
+            loadOrdersFromDatabase();
+          }).catch((error) => {
+            console.error("Error deleting orders: ", error);
+          });
+        } else {
+          alert('密碼錯誤，無法刪除資料。');
+        }
+      }
+    });
+
+    // 文件上傳至 Firebase Storage
+    document.getElementById('changeImageButton').addEventListener('click', function() {
+      document.getElementById('fileInput').click();
+    });
+
+    // 檔案選取後上傳
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const password = prompt('請輸入密碼以上傳圖片：');
+      if (password !== '0841') {
+        alert('密碼錯誤，無法上傳圖片。');
+        return;
+      }
+
+      const storageRef = storage.ref(`menu/${file.name}`);
+      const uploadTask = storageRef.put(file);
+
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log('Upload is ' + progress + '% done');
+        },
+        (error) => {
+          console.error("Error uploading file: ", error);
+        },
+        () => {
+          uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+            console.log('File available at', downloadURL);
+            db.collection("images").doc("menuImage").set({ url: downloadURL }).then(() => {
+              document.getElementById('menuImage').src = downloadURL;
+
+              const imageSelector = document.getElementById('imageSelector');
+              const option = document.createElement('option');
+              option.value = downloadURL;
+              option.textContent = file.name;
+              imageSelector.appendChild(option);
+
+              imageSelector.value = downloadURL;
             }).catch((error) => {
-                console.error("Error updating payment status: ", error);
+              console.error("Error updating image URL: ", error);
             });
+          });
         }
+      );
+    });
 
-        // 從資料庫載入訂單
-        function loadOrdersFromDatabase() {
-            db.collection("orders").get().then((querySnapshot) => {
-                const orders = [];
-                querySnapshot.forEach((doc) => {
-                    orders.push({ id: doc.id, ...doc.data() });
-                });
-                orders.sort((a, b) => b.timestamp - a.timestamp); // 按時間排序
-                updateOrderTable(orders);
-            }).catch((error) => {
-                console.error("Error getting orders: ", error);
-            });
-        }
+    // ----------------------------
+    // Magnifier 放大鏡功能
+    // ----------------------------
+    const magnifier = document.getElementById('magnifier');
+    const menuImage = document.getElementById('menuImage');
+    const menuImageContainer = document.querySelector('.menu-image');
+    const lensRadius = 10; // 半徑 10px
 
-        // 更新訂單表格
-        function updateOrderTable(orders) {
-            const tbody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
-            tbody.innerHTML = '';
-            let totalPrice = 0;
-            orders.forEach((order, index) => {
-                const row = tbody.insertRow();
-                const orderDate = new Date(order.timestamp);
-                const dateTimeString = orderDate.toLocaleString('zh-TW', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
+    // 當滑鼠進入圖片區，放大鏡平滑跳出
+    menuImageContainer.addEventListener('mouseenter', function(e) {
+      magnifier.style.transform = "scale(1)";
+      magnifier.style.opacity = "1";
+    });
 
-                row.innerHTML = `
-                    <td><input type="checkbox" data-id="${order.id}"></td>
-                    <td>${index + 1}</td>
-                    <td class="checkbox-container"><input type="checkbox" class="paid-checkbox" ${order.paid ? 'checked' : ''} onclick="confirmPayment(this, '${order.id}')" /></td>
-                    <td>${order.name}</td>
-                    <td>${order.meal}</td>
-                    <td>$${order.price.toFixed(2)}</td>
-                    <td>${dateTimeString}</td>
-                    <td>${order.note}</td>
-                `;
-                totalPrice += order.price;
-            });
-            document.getElementById('totalPrice').textContent = `總價格: $${totalPrice.toFixed(2)}`;
-        }
+    // 當滑鼠移出圖片區，隱藏放大鏡
+    menuImageContainer.addEventListener('mouseleave', function(e) {
+      magnifier.style.transform = "scale(0)";
+      magnifier.style.opacity = "0";
+    });
 
-        // 納費確認
-        function confirmPayment(checkbox, orderId) {
-            if (confirm('是否確定已經納費?')) {
-                checkbox.checked = true;
-                updatePaymentStatus(orderId, true);
-            } else {
-                checkbox.checked = false;
-                updatePaymentStatus(orderId, false);
-            }
-        }
+    // 滑鼠移動時更新放大鏡位置與背景
+    menuImageContainer.addEventListener('mousemove', function(e) {
+      // 取得圖片在視窗中的位置
+      const rect = menuImage.getBoundingClientRect();
+      // 計算鼠標在圖片上的相對位置
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      // 將放大鏡定位在滑鼠附近（固定定位相對視窗）
+      magnifier.style.left = (e.clientX - lensRadius) + "px";
+      magnifier.style.top = (e.clientY - lensRadius) + "px";
+      
+      // 若圖片已載入，設定放大鏡背景
+      if (menuImage.complete && menuImage.src) {
+        // 使用相同圖片作為背景
+        magnifier.style.backgroundImage = `url(${menuImage.src})`;
+        // 設定背景尺寸為圖片尺寸的 2 倍
+        const imgWidth = menuImage.offsetWidth;
+        const imgHeight = menuImage.offsetHeight;
+        magnifier.style.backgroundSize = (imgWidth * 2) + "px " + (imgHeight * 2) + "px";
+        // 背景位置調整，使滑鼠所在點成為放大後的中心
+        const bgPosX = -x * 2 + lensRadius;
+        const bgPosY = -y * 2 + lensRadius;
+        magnifier.style.backgroundPosition = `${bgPosX}px ${bgPosY}px`;
+      }
+    });
 
-        // 載入圖片選單與當前菜單圖片
-        function loadImageSelector() {
-            const imageSelector = document.getElementById('imageSelector');
-            imageSelector.innerHTML = '<option value="">選擇圖片</option>';
+    // ----------------------------
 
-            storage.ref('menu').listAll().then((result) => {
-                result.items.forEach((imageRef) => {
-                    imageRef.getDownloadURL().then((url) => {
-                        const option = document.createElement('option');
-                        option.value = url;
-                        option.textContent = imageRef.name;
-                        imageSelector.appendChild(option);
-                    });
-                });
-            }).catch((error) => {
-                console.error("Error loading images: ", error);
-            });
-
-            // 加載當前圖片
-            db.collection("images").doc("menuImage").get().then((doc) => {
-                if (doc.exists) {
-                    const menuImage = document.getElementById('menuImage');
-                    menuImage.src = doc.data().url;
-                    imageSelector.value = doc.data().url;
-                }
-            }).catch((error) => {
-                console.error("Error loading current image: ", error);
-            });
-        }
-
-        // 當圖片選單變更時
-        document.getElementById('imageSelector').addEventListener('change', function () {
-            const imageUrl = this.value;
-            if (imageUrl) {
-                const password = prompt('輸入密碼以更換圖片：');
-                if (password === '0841') {
-                    const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
-                    if (confirmChange) {
-                        db.collection("images").doc("menuImage").set({ url: imageUrl }).then(() => {
-                            document.getElementById('menuImage').src = imageUrl;
-                        }).catch((error) => {
-                            console.error("Error updating image URL: ", error);
-                        });
-                    } else {
-                        this.value = '';
-                    }
-                } else {
-                    alert('密碼錯誤，無法更換圖片。');
-                    this.value = '';
-                }
-            }
-        });
-
-        // 導出訂單為 Excel (CSV)
-        document.getElementById('exportButton').addEventListener('click', function () {
-            const table = document.getElementById('orderTable');
-            let csvContent = "﻿"; // BOM for UTF-8
-
-            // 加入表頭
-            const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
-            csvContent += headers.join(',') + "\n";
-
-            // 加入各行資料
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const rowData = Array.from(row.cells).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`);
-                csvContent += rowData.join(',') + "\n";
-            });
-
-            // 加入總價格
-            csvContent += `"","","","","",${document.getElementById('totalPrice').textContent}\n`;
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", `lunch_orders_${new Date().toISOString().slice(0, 10)}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        });
-
-        // 清除所有訂單資訊
-        document.getElementById('clearButton').addEventListener('click', function () {
-            if (confirm('確定要刪除所有單資訊嗎？')) {
-                const password = prompt('請輸入密碼以刪除所有訂單：');
-                if (password === '0841') {
-                    db.collection("orders").get().then((querySnapshot) => {
-                        const batch = db.batch();
-                        querySnapshot.forEach((doc) => {
-                            batch.delete(doc.ref);
-                        });
-                        return batch.commit();
-                    }).then(() => {
-                        loadOrdersFromDatabase();
-                    }).catch((error) => {
-                        console.error("Error clearing orders: ", error);
-                    });
-                } else {
-                    alert('密碼錯誤，無法清除資料。');
-                }
-            }
-        });
-
-        // 刪除選中的訂單
-        document.getElementById('deleteSelectedButton').addEventListener('click', function () {
-            const checkboxes = document.querySelectorAll('#orderTable tbody input[type="checkbox"]:checked');
-            const ids = Array.from(checkboxes).map(checkbox => checkbox.getAttribute('data-id'));
-
-            if (ids.length === 0) {
-                alert('請選擇要刪除的訂單。');
-                return;
-            }
-
-            if (confirm('確定要刪除選中的訂單嗎？')) {
-                const password = prompt('請輸入密碼以刪除選中的訂單：');
-                if (password === '0841') {
-                    const batch = db.batch();
-                    ids.forEach(id => {
-                        const docRef = db.collection("orders").doc(id);
-                        batch.delete(docRef);
-                    });
-                    batch.commit().then(() => {
-                        loadOrdersFromDatabase();
-                    }).catch((error) => {
-                        console.error("Error deleting orders: ", error);
-                    });
-                } else {
-                    alert('密碼錯誤，無法刪除資料。');
-                }
-            }
-        });
-
-        // 文件上傳至 Firebase Storage
-        document.getElementById('changeImageButton').addEventListener('click', function () {
-            document.getElementById('fileInput').click();
-        });
-
-        // 檔案選取後上傳
-        document.getElementById('fileInput').addEventListener('change', function (event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const password = prompt('請輸入密碼以上傳圖片：');
-            if (password !== '0841') {
-                alert('密碼錯誤，無法上傳圖片。');
-                return;
-            }
-
-            const storageRef = storage.ref(`menu/${file.name}`);
-            const uploadTask = storageRef.put(file);
-
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    console.log('Upload is ' + progress + '% done');
-                },
-                (error) => {
-                    console.error("Error uploading file: ", error);
-                },
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        console.log('File available at', downloadURL);
-                        db.collection("images").doc("menuImage").set({ url: downloadURL }).then(() => {
-                            document.getElementById('menuImage').src = downloadURL;
-
-                            const imageSelector = document.getElementById('imageSelector');
-                            const option = document.createElement('option');
-                            option.value = downloadURL;
-                            option.textContent = file.name;
-                            imageSelector.appendChild(option);
-
-                            imageSelector.value = downloadURL;
-                        }).catch((error) => {
-                            console.error("Error updating image URL: ", error);
-                        });
-                    });
-                }
-            );
-        });
-
-        // 初始化
-        updateDateTime();
-        loadOrdersFromDatabase();
-        loadImageSelector();
-        setInterval(updateDateTime, 60000);
-    </script>
+    // 初始化動作
+    updateDateTime();
+    loadOrdersFromDatabase();
+    loadImageSelector();
+    setInterval(updateDateTime, 60000);
+  </script>
 </body>
 </html>
