@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -144,33 +143,12 @@
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            transition: transform 0.3s, top 0.3s, left 0.3s;
+            transition: transform 0.3s ease;
         }
 
-        .menu-image img.enlarged {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.6);
-            z-index: 1000;
-        }
-
-        .enlarged-menu {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            background-color: white;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            padding: 20px;
-        }
-
-        .enlarged-menu img {
-            max-width: 90vw;
-            max-height: 90vh;
-            object-fit: contain;
+        /* 新增：滑鼠移入圖片顯示範圍時，圖片浮起並放大至 1.6 倍，並上移 10px */
+        .menu-image:hover img {
+            transform: translateY(-10px) scale(1.6);
         }
 
         .paid-checkbox {
@@ -205,32 +183,8 @@
             justify-content: center;
             align-items: center;
         }
-
-        .image-container {
-            position: relative;
-            width: 300px; /* 圖片容器的寬度 */
-            height: 200px; /* 圖片容器的高 */
-            overflow: hidden;
-        }
-
-        .zoom-image {
-            width: 100%;
-            height: 100%;
-        }
-
-        .circle {
-            position: absolute;
-            width: 10px; /* 直徑為10px */
-            height: 10px; /* 直徑為10px */
-            border: 3px solid red; /* 紅色線圈，粗細度為3px */
-            border-radius: 50%;
-            pointer-events: none; /* 確保圓圈不會阻擋滑鼠事件 */
-            transform: translate(-50%, -50%);
-            display: none; /* 初始狀態下隱藏 */
-        }
     </style>
 </head>
-
 <body>
     <div class="container">
         <h1>設計分室飲料點餐系統 Ver1.3</h1>
@@ -252,9 +206,6 @@
                     <div class="menu-image">
                         <img id="menuImage" src="" alt="今日菜單" />
                     </div>
-                </div>
-                <div class="enlarged-menu">
-                    <img id="enlargedMenuImage" src="" alt="放大的單" />
                 </div>
                 <button id="changeImageButton">上傳菜單</button>
                 <select id="imageSelector">
@@ -289,6 +240,7 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-storage-compat.js"></script>
@@ -324,7 +276,7 @@
         // 新增訂單到資料庫
         function addOrderToDatabase(order) {
             db.collection("orders").add(order).then(() => {
-                loadOrdersFromDatabase(); // 保證訂單顯示會更新
+                loadOrdersFromDatabase(); // 更新訂單顯示
                 document.getElementById('orderForm').reset(); // 清除表單數據
             }).catch((error) => {
                 console.error("Error adding order: ", error);
@@ -333,7 +285,7 @@
 
         // 處理表單提交
         document.getElementById('orderForm').addEventListener('submit', function (e) {
-            e.preventDefault(); // 防止頁面重新載
+            e.preventDefault(); // 防止頁面重新載入
             const name = this.elements['name'].value;
             const meal = this.elements['meal'].value;
             const price = parseFloat(this.elements['price'].value);
@@ -412,7 +364,7 @@
             }
         }
 
-        // 修改加載圖片選單函數
+        // 載入圖片選單與當前菜單圖片
         function loadImageSelector() {
             const imageSelector = document.getElementById('imageSelector');
             imageSelector.innerHTML = '<option value="">選擇圖片</option>';
@@ -434,9 +386,7 @@
             db.collection("images").doc("menuImage").get().then((doc) => {
                 if (doc.exists) {
                     const menuImage = document.getElementById('menuImage');
-                    const enlargedMenuImage = document.getElementById('enlargedMenuImage');
                     menuImage.src = doc.data().url;
-                    enlargedMenuImage.src = doc.data().url;
                     imageSelector.value = doc.data().url;
                 }
             }).catch((error) => {
@@ -454,7 +404,6 @@
                     if (confirmChange) {
                         db.collection("images").doc("menuImage").set({ url: imageUrl }).then(() => {
                             document.getElementById('menuImage').src = imageUrl;
-document.getElementById('enlargedMenuImage').src = imageUrl;
                         }).catch((error) => {
                             console.error("Error updating image URL: ", error);
                         });
@@ -468,23 +417,23 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
             }
         });
 
-        // 導出訂單為 Excel
+        // 導出訂單為 Excel (CSV)
         document.getElementById('exportButton').addEventListener('click', function () {
             const table = document.getElementById('orderTable');
             let csvContent = "﻿"; // BOM for UTF-8
 
-            // Add headers
+            // 加入表頭
             const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
             csvContent += headers.join(',') + "\n";
 
-            // Add rows
+            // 加入各行資料
             const rows = table.querySelectorAll('tbody tr');
             rows.forEach(row => {
                 const rowData = Array.from(row.cells).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`);
                 csvContent += rowData.join(',') + "\n";
             });
 
-            // Add total price
+            // 加入總價格
             csvContent += `"","","","","",${document.getElementById('totalPrice').textContent}\n`;
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -500,7 +449,7 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
             }
         });
 
-        // 清除資訊
+        // 清除所有訂單資訊
         document.getElementById('clearButton').addEventListener('click', function () {
             if (confirm('確定要刪除所有單資訊嗎？')) {
                 const password = prompt('請輸入密碼以刪除所有訂單：');
@@ -551,35 +500,12 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
             }
         });
 
-        // 修正: 顯示文件上傳窗口
+        // 文件上傳至 Firebase Storage
         document.getElementById('changeImageButton').addEventListener('click', function () {
-            document.getElementById('fileInput').click(); // 觸發文件選視窗
+            document.getElementById('fileInput').click();
         });
 
-        // 新增放大菜單功能
-        const menuContainer = document.querySelector('.menu-container');
-        const enlargedMenu = document.querySelector('.enlarged-menu');
-
-        menuContainer.addEventListener('mousemove', (e) => {
-    const zoomFactor = 4;
-    const radius = 5;
-    const rect = menuContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    enlargedMenu.style.display = 'block';
-    enlargedMenu.style.width = `${radius * 2}px`;
-    enlargedMenu.style.height = `${radius * 2}px`;
-    enlargedMenu.style.clipPath = `circle(${radius}px at ${radius}px ${radius}px)`;
-    enlargedMenu.style.transform = `translate(${e.pageX - radius}px, ${e.pageY - radius}px) scale(${zoomFactor})`;
-    enlargedMenu.querySelector('img').src = document.getElementById('menuImage').src;
-});
-
-        menuContainer.addEventListener('mouseleave', () => {
-    enlargedMenu.style.display = 'none';
-});
-
-        // 文件選擇後上傳到 Firebase Storage
+        // 檔案選取後上傳
         document.getElementById('fileInput').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -606,7 +532,6 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
                         console.log('File available at', downloadURL);
                         db.collection("images").doc("menuImage").set({ url: downloadURL }).then(() => {
                             document.getElementById('menuImage').src = downloadURL;
-                            document.getElementById('enlargedMenuImage').src = downloadURL;
 
                             const imageSelector = document.getElementById('imageSelector');
                             const option = document.createElement('option');
@@ -615,7 +540,6 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
                             imageSelector.appendChild(option);
 
                             imageSelector.value = downloadURL;
-
                         }).catch((error) => {
                             console.error("Error updating image URL: ", error);
                         });
@@ -629,37 +553,6 @@ document.getElementById('enlargedMenuImage').src = imageUrl;
         loadOrdersFromDatabase();
         loadImageSelector();
         setInterval(updateDateTime, 60000);
-
-        const imageContainer = document.querySelector('.image-container');
-        const zoomImage = document.querySelector('.zoom-image');
-        const circle = document.querySelector('.circle');
-
-        imageContainer.addEventListener('mousemove', (e) => {
-            const rect = imageContainer.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            zoomImage.style.transformOrigin = `${x}px ${y}px`;
-            circle.style.left = `${x}px`;
-            circle.style.top = `${y}px`;
-            circle.style.display = 'block';
-        });
-
-        imageContainer.addEventListener('mouseleave', () => {
-            zoomImage.style.transformOrigin = 'center center';
-            circle.style.display = 'none';
-        });
-
-        const menuImage = document.getElementById('menuImage');
-
-        menuImage.addEventListener('mouseenter', () => {
-            menuImage.classList.add('enlarged');
-        });
-
-        menuImage.addEventListener('mouseleave', () => {
-            menuImage.classList.remove('enlarged');
-        });
     </script>
 </body>
-
 </html>
