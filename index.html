@@ -662,6 +662,7 @@
     // 初始化應用程序
     function initializeApp() {
       try {
+        console.log("開始初始化 Firebase...");
         // Firebase 配置 - 保持原有的配置
         const firebaseConfig = {
           apiKey: "AIzaSyBOBza8v4DoSna4Fg6hjWrHO0biq0iDRNo",
@@ -675,25 +676,57 @@
         
         if (!firebase.apps.length) {
           firebase.initializeApp(firebaseConfig);
+          console.log("Firebase 應用已初始化");
+        } else {
+          console.log("Firebase 應用已存在");
         }
         
         const db = firebase.firestore();
         const storage = firebase.storage();
         
-        // 初始化頁面
-        updateDateTime();
-        loadOrdersFromDatabase();
-        loadImageSelector();
-        setInterval(updateDateTime, 60000);
+        // 測試連接
+        console.log("測試 Firestore 連接...");
+        db.collection("test").doc("connection").set({
+          timestamp: new Date().toISOString(),
+          test: "connection"
+        }).then(() => {
+          console.log("Firestore 連接正常");
+        }).catch(err => {
+          console.error("Firestore 連接測試失敗:", err);
+        });
+        
+        console.log("測試 Storage 連接...");
+        storage.ref().child("test").listAll().then(() => {
+          console.log("Storage 連接正常");
+        }).catch(err => {
+          console.error("Storage 連接測試失敗:", err);
+        });
         
         // 設置全局變數以便其他函數使用
         window.db = db;
         window.storage = storage;
         
-        console.log("Firebase initialized successfully");
+        // 初始化頁面
+        updateDateTime();
+        console.log("日期時間已更新");
+        
+        // 先載入訂單，再載入菜單
+        loadOrdersFromDatabase();
+        console.log("訂單載入中...");
+        
+        // 延遲加載菜單以確保 Firebase 準備就緒
+        setTimeout(() => {
+          console.log("開始載入菜單選項...");
+          loadImageSelector();
+        }, 1000);
+        
+        setInterval(updateDateTime, 60000);
+        
+        console.log("Firebase 初始化成功");
+        showToast('系統初始化成功', 'success');
       } catch (error) {
-        console.error("Error initializing Firebase:", error);
-        alert("系統初始化失敗，請刷新頁面重試。");
+        console.error("Firebase 初始化錯誤:", error);
+        alert("系統初始化失敗，請刷新頁面重試。錯誤: " + error.message);
       }
     }
 
@@ -875,34 +908,74 @@
     function loadImageSelector() {
       if (!window.storage || !window.db) {
         console.warn("Storage or database not initialized yet");
+        setTimeout(loadImageSelector, 1000); // 延遲重試
         return;
       }
 
+      console.log("開始載入菜單選項...");
       const imageSelector = document.getElementById('imageSelector');
       imageSelector.innerHTML = '<option value="">選擇已有菜單</option>';
 
+      // 改進的方式載入圖片選項
       window.storage.ref('menu').listAll().then((result) => {
-        result.items.forEach((imageRef) => {
-          imageRef.getDownloadURL().then((url) => {
+        console.log("發現菜單數量:", result.items.length);
+        
+        // 如果沒有菜單項目，顯示提示
+        if (result.items.length === 0) {
+          showToast('目前沒有可用的菜單', 'warning');
+          return;
+        }
+        
+        // 創建一個 Promise 數組來跟踪所有加載操作
+        const promises = result.items.map(imageRef => {
+          return imageRef.getDownloadURL().then(url => {
+            console.log("已載入菜單項目:", imageRef.name);
             const option = document.createElement('option');
             option.value = url;
             option.textContent = imageRef.name;
             imageSelector.appendChild(option);
+            return { url, name: imageRef.name };
+          }).catch(err => {
+            console.error("無法載入菜單項目:", imageRef.name, err);
+            return null;
           });
         });
-      }).catch((error) => {
-        console.error("Error loading images: ", error);
-        showToast('載入菜單圖片失敗', 'error');
-      });
-
-      // 加載當前圖片
-      window.db.collection("images").doc("menuImage").get().then((doc) => {
-        if (doc.exists && doc.data().url) {
-          const menuImage = document.getElementById('menuImage');
-          menuImage.src = doc.data().url;
+        
+        // 等待所有項目加載完成
+        return Promise.all(promises);
+      }).then(menuItems => {
+        if (menuItems && menuItems.length > 0) {
+          console.log("所有菜單項目載入完成，共", menuItems.filter(Boolean).length, "個");
+          
+          // 加載當前菜單圖片
+          return window.db.collection("images").doc("menuImage").get().then((doc) => {
+            if (doc.exists && doc.data() && doc.data().url) {
+              const currentUrl = doc.data().url;
+              console.log("當前菜單URL:", currentUrl);
+              
+              const menuImage = document.getElementById('menuImage');
+              menuImage.src = currentUrl;
+              
+              // 設置選擇器的值
+              const imageSelector = document.getElementById('imageSelector');
+              imageSelector.value = currentUrl;
+              
+              // 標記已選擇的項目
+              const validMenuItems = menuItems.filter(Boolean);
+              const found = validMenuItems.find(item => item.url === currentUrl);
+              if (found) {
+                console.log("已選中菜單:", found.name);
+              } else {
+                console.log("當前菜單不在列表中");
+              }
+            } else {
+              console.log("沒有當前菜單設置");
+            }
+          });
         }
       }).catch((error) => {
-        console.error("Error loading current image: ", error);
+        console.error("載入菜單列表失敗:", error);
+        showToast('載入菜單圖片失敗', 'error');
       });
     }
 
@@ -910,27 +983,42 @@
     document.addEventListener('DOMContentLoaded', function() {
       // 當圖片選單變更時
       document.getElementById('imageSelector').addEventListener('change', function() {
-        if (!window.db) return;
+        if (!window.db) {
+          showToast('系統尚未初始化完成，請稍後再試', 'error');
+          return;
+        }
         
         const imageUrl = this.value;
         if (imageUrl) {
+          console.log("選擇菜單URL:", imageUrl);
+          
           const password = prompt('輸入密碼以更換圖片：');
           if (password === '0841') {
             const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
             if (confirmChange) {
-              document.getElementById('menuImage').src = imageUrl;
-              window.db.collection("images").doc("menuImage").set({ url: imageUrl }).then(() => {
+              // 先更新圖片顯示
+              const menuImage = document.getElementById('menuImage');
+              menuImage.src = imageUrl;
+              console.log("已更新菜單顯示");
+              
+              // 再更新資料庫
+              window.db.collection("images").doc("menuImage").set({ 
+                url: imageUrl,
+                updatedAt: new Date().toISOString()
+              }).then(() => {
+                console.log("資料庫菜單記錄已更新");
                 showToast('菜單已更新');
               }).catch((error) => {
-                console.error("Error updating image URL: ", error);
+                console.error("更新菜單URL失敗:", error);
                 showToast('菜單更新失敗', 'error');
               });
             } else {
-              this.value = '';
+              console.log("使用者取消變更");
+              this.value = document.getElementById('menuImage').src || '';
             }
           } else {
             alert('密碼錯誤，無法更換圖片。');
-            this.value = '';
+            this.value = document.getElementById('menuImage').src || '';
           }
         }
       });
