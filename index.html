@@ -1140,7 +1140,15 @@
         // 加入各行資料
         const rows = table.querySelectorAll('tbody tr');
         rows.forEach(row => {
-          const rowData = Array.from(row.cells).map(cell => `"${cell.textContent.replace(/"/g, '""')}"`);
+          const rowData = Array.from(row.cells).map((cell, index) => {
+            // 特殊處理已納費欄位
+            if (index === 2) {
+              const checkbox = cell.querySelector('input[type="checkbox"]');
+              return `"${checkbox && checkbox.checked ? '已繳費' : '尚未繳費'}"`;
+            } else {
+              return `"${cell.textContent.replace(/"/g, '""')}"`;
+            }
+          });
           csvContent += rowData.join(',') + "\n";
         });
 
