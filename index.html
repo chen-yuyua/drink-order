@@ -25,6 +25,63 @@
       --radius: 20px;
       --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    
+    /* 全螢幕模式樣式 */
+    .fullscreen-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .fullscreen-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .fullscreen-image {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    
+    .fullscreen-overlay.active .fullscreen-image {
+      transform: scale(1);
+    }
+    
+    .close-fullscreen {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .close-fullscreen:hover {
+      background-color: var(--danger-color);
+      transform: rotate(90deg);
+    }
 
     * {
       box-sizing: border-box;
@@ -619,6 +676,14 @@
   
   <!-- 通知容器 -->
   <div class="toast-container"></div>
+  
+  <!-- 全螢幕顯示菜單容器 -->
+  <div id="fullscreenOverlay" class="fullscreen-overlay">
+    <img id="fullscreenImage" class="fullscreen-image" src="" alt="全螢幕菜單" />
+    <div id="closeFullscreen" class="close-fullscreen">
+      <i class="fas fa-times"></i>
+    </div>
+  </div>
 
   <script>
     // 先檢查 Firebase 是否已經載入
@@ -1208,6 +1273,44 @@
             });
           }
         );
+      });
+      
+      // 全螢幕顯示菜單功能
+      document.getElementById('menuImage').addEventListener('click', function() {
+        if (this.src) {
+          const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+          const fullscreenImage = document.getElementById('fullscreenImage');
+          
+          fullscreenImage.src = this.src;
+          fullscreenOverlay.classList.add('active');
+          document.body.style.overflow = 'hidden'; // 防止背景滾動
+        }
+      });
+      
+      // 關閉全螢幕顯示
+      document.getElementById('closeFullscreen').addEventListener('click', function() {
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        fullscreenOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // 恢復背景滾動
+      });
+      
+      // 點擊背景也可以關閉全螢幕
+      document.getElementById('fullscreenOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+      
+      // 按ESC鍵也可以關閉全螢幕
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+          if (fullscreenOverlay.classList.contains('active')) {
+            fullscreenOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
       });
     });
   </script>
