@@ -764,42 +764,51 @@
       imageSelector.innerHTML = '<option value="">選擇已有菜單</option>';
       menuImage.src = ''; // 清空當前圖片
 
+      console.log(`[DEBUG] Attempting to load images for day: ${day}`);
+
       try {
         // 獲取 Storage 中該星期的所有菜單圖片
         const menuListRef = ref(storage, `menu/${day}`);
+        console.log(`[DEBUG] Storage reference path: menu/${day}`);
         const result = await listAll(menuListRef);
         
         if (result.items.length === 0) {
           showToast('目前沒有可用的菜單圖片', 'warning');
+          console.log(`[DEBUG] No images found in storage for menu/${day}`);
         }
 
         const menuItems = await Promise.all(result.items.map(async (imageRef) => {
           try {
             const url = await getDownloadURL(imageRef);
+            console.log(`[DEBUG] Fetched URL for ${imageRef.name}: ${url}`);
             const option = document.createElement('option');
             option.value = url;
             option.textContent = imageRef.name;
             imageSelector.appendChild(option);
             return { url, name: imageRef.name };
           } catch (err) {
-            console.error("無法載入菜單項目:", imageRef.name, err);
+            console.error(`[DEBUG] 無法載入菜單項目: ${imageRef.name}`, err);
             return null;
           }
         }));
 
         // 獲取 Firestore 中該星期的當前菜單圖片 URL
         currentMenuRef = doc(db, "dailyMenus", day);
+        console.log(`[DEBUG] Firestore document reference for current menu: dailyMenus/${day}`);
         const docSnap = await getDoc(currentMenuRef);
 
         if (docSnap.exists() && docSnap.data() && docSnap.data().url) {
           const currentUrl = docSnap.data().url;
+          console.log(`[DEBUG] Current menu URL from Firestore for ${day}: ${currentUrl}`);
           menuImage.src = currentUrl;
           imageSelector.value = currentUrl;
         } else {
-          console.log(`沒有為 ${day} 設置當前菜單`);
+          console.warn(`[DEBUG] 沒有為 ${day} 設置當前菜單。文件存在: ${docSnap.exists()}`);
+          menuImage.src = ''; // Ensure image is cleared if no URL
+          imageSelector.value = ''; // Clear selector if no URL
         }
       } catch (error) {
-        console.error("載入菜單列表失敗:", error);
+        console.error("[DEBUG] 載入菜單列表失敗:", error);
         showToast('載入菜單圖片失敗', 'error');
       }
     }
@@ -860,6 +869,9 @@
       showToast('正在上傳圖片...', 'warning');
 
       const storageRef = ref(storage, `menu/${currentDay}/${file.name}`);
+      console.log(`[DEBUG] Attempting to upload file: ${file.name} for day: ${currentDay}`);
+      console.log(`[DEBUG] Upload storage reference path: menu/${currentDay}/${file.name}`);
+
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on('state_changed',
@@ -868,13 +880,21 @@
           console.log('Upload is ' + progress + '% done');
         },
         (error) => {
-          console.error("Error uploading file: ", error);
+          console.error("[DEBUG] Error uploading file: ", error);
           showToast('圖片上傳失敗', 'error');
         },
         async () => {
           try {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             menuImage.src = downloadURL;
+            console.log(`[DEBUG] File uploaded successfully. Download URL: ${downloadURL}`);
+            
+            // 確保 currentMenuRef 已被正確設置
+            if (!currentMenuRef) {
+                currentMenuRef = doc(db, "dailyMenus", currentDay);
+                console.log(`[DEBUG] Initializing currentMenuRef for dailyMenus/${currentDay}`);
+            }
+            console.log(`[DEBUG] Updating Firestore document dailyMenus/${currentDay} with URL: ${downloadURL}`);
             await updateDoc(currentMenuRef, { url: downloadURL, updatedAt: new Date().toISOString() });
             
             // 更新選擇器
@@ -886,7 +906,7 @@
 
             showToast('圖片上傳成功！');
           } catch (error) {
-            console.error("Error updating image URL: ", error);
+            console.error("[DEBUG] Error updating image URL in Firestore: ", error);
             showToast('更新菜單圖片URL失敗', 'error');
           }
         }
@@ -920,7 +940,11 @@
             // 如果被刪除的是當前顯示的菜單，則清空顯示並更新 Firestore
             if (imageSelector.value === menuImage.src) {
               menuImage.src = '';
-              await updateDoc(currentMenuRef, { url: '' });
+              // 確保 currentMenuRef 已被正確設置
+              if (!currentMenuRef) {
+                  currentMenuRef = doc(db, "dailyMenus", currentDay);
+              }
+              await updateDoc(currentMenuRef, { url: '' }); // 清空 Firestore 中的 URL
             }
             
             imageSelector.remove(imageSelector.selectedIndex);
