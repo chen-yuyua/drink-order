@@ -3,41 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>設計分室飲料點餐系統 - 週菜單</title>
+  <title>設計分室飲料點餐系統 Ver2.0</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* 自定義顏色變數 */
     :root {
-      --primary-color: #6366f1; /* Indigo 500 */
-      --primary-dark: #4f46e5; /* Indigo 600 */
-      --secondary-color: #f59e0b; /* Amber 500 */
-      --accent-color: #10b981; /* Emerald 500 */
-      --background-color: #f9fafb; /* Gray 50 */
+      --primary-color: #7c9cbf;
+      --primary-dark: #5e86a9;
+      --secondary-color: #f6ae99;
+      --accent-color: #98c9b2;
+      --background-color: #f9f9f9;
       --card-bg: #ffffff;
-      --text-color: #1f2937; /* Gray 900 */
-      --text-light: #6b7280; /* Gray 500 */
-      --border-color: #e5e7eb; /* Gray 200 */
-      --success-color: #10b981; /* Emerald 500 */
-      --danger-color: #ef4444; /* Red 500 */
-      --warning-color: #f59e0b; /* Amber 500 */
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.1);
-      --radius: 0.75rem; /* Adjusted radius for more natural corners (was 1.5rem) */
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --text-color: #4a4a4a;
+      --text-light: #8b99a6;
+      --border-color: #e9ecef;
+      --success-color: #98c9b2;
+      --danger-color: #e5989b;
+      --warning-color: #f6c177;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+      --shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.06);
+      --radius: 20px;
+      --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    /* 保持字體樣式 */
-    body {
-      font-family: 'Noto Sans TC', sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      padding: 0;
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
-
+    
     /* 全螢幕模式樣式 */
     .fullscreen-overlay {
       position: fixed;
@@ -95,6 +83,395 @@
       transform: rotate(90deg);
     }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .app-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      text-align: center;
+      position: relative;
+      letter-spacing: -0.5px;
+    }
+
+    .app-title:after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background-color: var(--secondary-color);
+      border-radius: 10px;
+    }
+
+    #datetime {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      font-weight: 500;
+      margin-top: 15px;
+      padding: 8px 20px;
+      background-color: var(--card-bg);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 35px;
+      margin-bottom: 45px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 30px;
+      transition: var(--transition);
+      border: 1px solid rgba(230, 230, 230, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-7px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .card-icon {
+      font-size: 1.7rem;
+      color: var(--primary-color);
+      margin-right: 15px;
+      background-color: rgba(124, 156, 191, 0.1);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-light);
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      font-size: 1rem;
+      transition: var(--transition);
+      background-color: var(--background-color);
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(124, 156, 191, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon {
+      margin-right: 10px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #f0a086;
+      transform: translateY(-3px);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #e08587;
+      transform: translateY(-3px);
+    }
+
+    .btn-neutral {
+      background-color: var(--text-light);
+      color: white;
+    }
+
+    .btn-neutral:hover {
+      background-color: #7a8795;
+      transform: translateY(-3px);
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      border-radius: 12px;
+    }
+
+    .menu-container {
+      width: 100%;
+      height: 500px;
+      margin: 0 auto 25px;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background-color: #f3f4f6;
+      border: 1px solid rgba(230, 230, 230, 0.7);
+    }
+
+    .menu-image {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f8f9fa;
+      transition: var(--transition);
+    }
+
+    .menu-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .file-upload {
+      position: relative;
+      overflow: hidden;
+      margin-right: 10px;
+      flex-grow: 1;
+    }
+
+    .file-upload .btn {
+      width: 100%;
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    select {
+      flex-grow: 2;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237c9cbf'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 20px;
+      padding-right: 40px;
+    }
+
+    #deleteMenuButton {
+      flex-grow: 1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 25px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th,
+    td {
+      padding: 16px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    tbody tr {
+      background-color: var(--card-bg);
+      transition: var(--transition);
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #fafbfc;
+    }
+
+    tbody tr:hover {
+      background-color: #f1f5f9;
+    }
+
+    td {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .checkbox-cell {
+      text-align: center;
+      width: 45px;
+    }
+
+    .number-cell {
+      width: 55px;
+      text-align: center;
+    }
+
+    .paid-checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--success-color);
+    }
+
+    .total-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin: 25px 0;
+    }
+
+    #totalPrice {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      background-color: var(--card-bg);
+      padding: 12px 25px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
+      border: 1px solid rgba(230, 230, 230, 0.7);
+    }
+
+    .actions-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border-radius: 30px;
+      margin-left: 12px;
+    }
+
+    .badge-new {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
     /* Glassmorphism effect */
     .glass-effect {
       background: rgba(255, 255, 255, 0.7);
@@ -112,11 +489,11 @@
     }
 
     .toast {
-      padding: 1rem 1.5rem;
-      border-radius: 1.125rem; /* 18px */
-      margin-bottom: 1rem;
+      padding: 16px 24px;
+      border-radius: 18px;
+      margin-bottom: 16px;
       color: white;
-      box-shadow: var(--shadow);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
       display: flex;
       align-items: center;
       min-width: 300px;
@@ -126,7 +503,7 @@
     }
 
     .toast-icon {
-      margin-right: 0.875rem; /* 14px */
+      margin-right: 14px;
       font-size: 1.2rem;
     }
 
@@ -140,71 +517,6 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* 動畫 */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .fade-in {
-      animation: fadeIn 0.5s ease forwards;
-    }
-
-    .card {
-      animation: fadeIn 0.5s ease forwards;
-      animation-delay: calc(var(--animation-order) * 0.1s);
-      opacity: 0;
-    }
-
-    /* 週菜單卡片樣式 */
-    .day-card {
-      @apply flex flex-col items-center justify-center p-6 shadow-lg cursor-pointer transition-all duration-300 ease-in-out;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius); /* Apply the new radius variable */
-      text-align: center; /* Center align content within the card */
-      padding-top: 2rem; /* Increased top padding */
-      padding-bottom: 2rem; /* Increased bottom padding */
-    }
-    .day-card:hover {
-      @apply transform -translate-y-2 shadow-xl;
-      box-shadow: var(--shadow-hover);
-    }
-    .day-card-title {
-      @apply text-2xl font-bold mb-2;
-      color: var(--primary-color);
-    }
-    .day-card-date { /* 日期文字樣式 */
-      @apply text-gray-500 text-sm mb-2;
-    }
-    .day-card-subtitle {
-      @apply text-sm text-gray-500;
-    }
-
-    /* 今日卡片樣式 */
-    .day-card.today-card {
-      border-color: var(--danger-color); /* Red border */
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); /* Red shadow */
-      background-color: #fef2f2; /* Light red background */
-    }
-    .day-card.today-card .card-icon {
-      color: var(--danger-color) !important; /* Red icon */
-    }
-    .day-card.today-card .day-card-title {
-      color: var(--danger-color) !important; /* Red text */
-    }
-    .day-card.today-card .day-card-date {
-      color: var(--danger-color) !important; /* Red date text */
-    }
-
-    /* 訂單頁面的樣式調整 */
-    .order-page {
-      display: none; /* 預設隱藏 */
-    }
-    .order-page.active {
-      display: block; /* 點擊後顯示 */
-    }
-
     /* 響應式調整 */
     @media (max-width: 768px) {
       .content-wrapper {
@@ -212,7 +524,7 @@
       }
       
       .card {
-        padding: 1.5rem;
+        padding: 25px;
       }
       
       .app-title {
@@ -236,170 +548,136 @@
       }
       
       th, td {
-        padding: 0.75rem 0.625rem; /* 12px 10px */
+        padding: 12px 10px;
       }
+    }
+
+    /* 添加動畫 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .card {
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: calc(var(--animation-order) * 0.1s);
+      opacity: 0;
     }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-  <div class="container mx-auto p-10 relative">
-    <header class="flex flex-col items-center mb-12 relative">
-      <h1 class="app-title text-5xl font-extrabold text-indigo-600 mb-4 relative tracking-tight">
-        設計分室飲料點餐系統 <span class="text-sm font-medium bg-emerald-500 text-white px-3 py-1 rounded-full ml-3">Ver3.0</span>
-        <span class="absolute bottom-[-0.3125rem] left-1/2 -translate-x-1/2 w-16 h-1 bg-amber-500 rounded-full"></span>
-      </h1>
-      <div id="datetime" class="text-lg font-medium text-gray-500 mt-4 px-5 py-2 bg-white rounded-full shadow-md glass-effect"></div>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="app-title">設計分室飲料點餐系統 <span class="badge badge-new">Ver2.0</span></h1>
+      <div id="datetime" class="glass-effect"></div>
     </header>
 
-    <div id="weeklyMenuPage" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-      <div class="day-card" data-day="monday">
-        <div class="card-icon"><i class="fas fa-calendar-day text-indigo-500 text-3xl mb-3"></i></div>
-        <h2 class="day-card-title">星期一</h2>
-        <p class="day-card-date"></p>
-        <p class="day-card-subtitle">點擊查看今日菜單並訂餐</p>
-      </div>
-      <div class="day-card" data-day="tuesday">
-        <div class="card-icon"><i class="fas fa-calendar-day text-indigo-500 text-3xl mb-3"></i></div>
-        <h2 class="day-card-title">星期二</h2>
-        <p class="day-card-date"></p>
-        <p class="day-card-subtitle">點擊查看今日菜單並訂餐</p>
-      </div>
-      <div class="day-card" data-day="wednesday">
-        <div class="card-icon"><i class="fas fa-calendar-day text-indigo-500 text-3xl mb-3"></i></div>
-        <h2 class="day-card-title">星期三</h2>
-        <p class="day-card-date"></p>
-        <p class="day-card-subtitle">點擊查看今日菜單並訂餐</p>
-      </div>
-      <div class="day-card" data-day="thursday">
-        <div class="card-icon"><i class="fas fa-calendar-day text-indigo-500 text-3xl mb-3"></i></div>
-        <h2 class="day-card-title">星期四</h2>
-        <p class="day-card-date"></p>
-        <p class="day-card-subtitle">點擊查看今日菜單並訂餐</p>
-      </div>
-      <div class="day-card" data-day="friday">
-        <div class="card-icon"><i class="fas fa-calendar-day text-indigo-500 text-3xl mb-3"></i></div>
-        <h2 class="day-card-title">星期五</h2>
-        <p class="day-card-date"></p>
-        <p class="day-card-subtitle">點擊查看今日菜單並訂餐</p>
-      </div>
-      </div>
-
-    <div id="orderSystemPage" class="order-page">
-      <button id="backToWeeklyMenu" class="btn bg-gray-500 text-white px-6 py-3 rounded-xl text-base font-medium flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-gray-600 hover:-translate-y-1 mb-8">
-        <i class="fas fa-arrow-left btn-icon mr-2"></i>返回週菜單
-      </button>
-
-      <div class="content-wrapper grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <div class="card glass-effect" style="--animation-order: 1">
-          <div class="card-header flex items-center mb-6">
-            <div class="card-icon bg-indigo-100 text-indigo-500 w-12 h-12 rounded-full flex items-center justify-center mr-4 text-2xl">
-              <i class="fas fa-utensils"></i>
-            </div>
-            <h2 class="card-title text-3xl font-semibold text-indigo-600">訂餐表單</h2>
-          </div>
-          <form id="orderForm" class="flex flex-col">
-            <div class="form-group mb-5 relative">
-              <label for="name" class="block text-sm font-medium text-gray-500 mb-2">您的姓名</label>
-              <input type="text" id="name" name="name" placeholder="請輸入您的姓名" required
-                     class="w-full px-4 py-3 border border-gray-300 rounded-xl text-base transition-all duration-300 ease-in-out bg-gray-50 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
-            </div>
-            <div class="form-group mb-5 relative">
-              <label for="meal" class="block text-sm font-medium text-gray-500 mb-2">餐點名稱</label>
-              <input type="text" id="meal" name="meal" placeholder="請輸入餐點名稱" required
-                     class="w-full px-4 py-3 border border-gray-300 rounded-xl text-base transition-all duration-300 ease-in-out bg-gray-50 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
-            </div>
-            <div class="form-group mb-5 relative">
-              <label for="price" class="block text-sm font-medium text-gray-500 mb-2">價格</label>
-              <input type="number" id="price" name="price" placeholder="請輸入價格" step="0.01" min="0" required
-                     class="w-full px-4 py-3 border border-gray-300 rounded-xl text-base transition-all duration-300 ease-in-out bg-gray-50 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
-            </div>
-            <div class="form-group mb-5 relative">
-              <label for="note" class="block text-sm font-medium text-gray-500 mb-2">備註</label>
-              <textarea id="note" name="note" placeholder="如有特殊要求請填寫" rows="3"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl text-base transition-all duration-300 ease-in-out bg-gray-50 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 resize-y min-h-[90px]"></textarea>
-            </div>
-            <button type="submit" class="btn bg-indigo-600 text-white px-6 py-3 rounded-xl text-base font-medium flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-indigo-700 hover:-translate-y-1">
-              <i class="fas fa-paper-plane btn-icon mr-2"></i>提交訂單
-            </button>
-          </form>
+    <div class="content-wrapper">
+      <div class="card glass-effect" style="--animation-order: 1">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-utensils"></i></div>
+          <h2 class="card-title">訂餐表單</h2>
         </div>
-
-        <div class="card glass-effect" style="--animation-order: 2">
-          <div class="card-header flex items-center mb-6">
-            <div class="card-icon bg-indigo-100 text-indigo-500 w-12 h-12 rounded-full flex items-center justify-center mr-4 text-2xl">
-              <i class="fas fa-clipboard-list"></i>
-            </div>
-            <h2 class="card-title text-3xl font-semibold text-indigo-600">今日菜單</h2>
+        <form id="orderForm">
+          <div class="form-group">
+            <label for="name">您的姓名</label>
+            <input type="text" id="name" name="name" placeholder="請輸入您的姓名" required>
           </div>
-          <div class="menu-container w-full h-[500px] mx-auto mb-6 relative overflow-hidden rounded-2xl shadow-md bg-gray-100 border border-gray-200">
-            <div class="menu-image w-full h-full flex justify-center items-center bg-gray-50 transition-all duration-300 ease-in-out">
-              <img id="menuImage" src="" alt="今日菜單" class="max-w-full max-h-full object-contain transition-transform duration-300 ease-in-out"/>
-            </div>
+          <div class="form-group">
+            <label for="meal">餐點名稱</label>
+            <input type="text" id="meal" name="meal" placeholder="請輸入餐點名稱" required>
           </div>
-          <div class="menu-controls flex flex-wrap gap-3">
-            <div class="file-upload relative overflow-hidden flex-grow">
-              <button id="changeImageButton" class="btn bg-amber-500 text-white px-6 py-3 rounded-xl text-base font-medium w-full flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-amber-600 hover:-translate-y-1">
-                <i class="fas fa-upload btn-icon mr-2"></i>上傳菜單
-              </button>
-              <input type="file" id="fileInput" class="absolute left-0 top-0 opacity-0 w-full h-full cursor-pointer">
-            </div>
-            <select id="imageSelector" class="form-select flex-grow-2 appearance-none bg-white px-4 py-3 border border-gray-300 rounded-xl text-base transition-all duration-300 ease-in-out focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 bg-no-repeat bg-right-3 bg-[url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%236366f1\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E')] bg-[length:20px]">
-              <option value="">選擇已有菜單</option>
-            </select>
-            <button id="deleteMenuButton" class="btn bg-red-500 text-white px-6 py-3 rounded-xl text-base font-medium flex-grow flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-red-600 hover:-translate-y-1">
-              <i class="fas fa-trash-alt btn-icon mr-2"></i>刪除菜單
-            </button>
+          <div class="form-group">
+            <label for="price">價格</label>
+            <input type="number" id="price" name="price" placeholder="請輸入價格" step="0.01" min="0" required>
           </div>
-        </div>
-      </div>
-
-      <div class="card glass-effect" style="--animation-order: 3">
-        <div class="card-header flex items-center mb-6">
-          <div class="card-icon bg-indigo-100 text-indigo-500 w-12 h-12 rounded-full flex items-center justify-center mr-4 text-2xl">
-            <i class="fas fa-list-alt"></i>
+          <div class="form-group">
+            <label for="note">備註</label>
+            <textarea id="note" name="note" placeholder="如有特殊要求請填寫" rows="3"></textarea>
           </div>
-          <h2 class="card-title text-3xl font-semibold text-indigo-600">今日訂單</h2>
-        </div>
-
-        <div class="table-responsive overflow-x-auto">
-          <table id="orderTable" class="w-full border-separate border-spacing-0 mt-6 rounded-2xl overflow-hidden shadow-md">
-            <thead>
-              <tr>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide rounded-tl-2xl"></th>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide">No.</th>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide">已納費</th>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide">姓名</th>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide">餐點</th>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide">價格</th>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide">訂購時間</th>
-                <th class="px-4 py-4 text-left bg-indigo-600 text-white font-medium tracking-wide rounded-tr-2xl">備註</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-
-        <div class="total-section flex flex-col items-end my-6">
-          <div id="totalPrice" class="text-2xl font-bold text-indigo-600 bg-white px-6 py-3 rounded-2xl shadow-md mb-6 border border-gray-200 glass-effect">總價格: $0.00</div>
-        </div>
-
-        <div class="actions-section flex flex-wrap gap-4 mb-10">
-          <button id="exportButton" class="btn bg-indigo-600 text-white px-6 py-3 rounded-xl text-base font-medium flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-indigo-700 hover:-translate-y-1">
-            <i class="fas fa-file-export btn-icon mr-2"></i>導出訂單為 Excel
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane btn-icon"></i>提交訂單
           </button>
-          <button id="clearButton" class="btn bg-red-500 text-white px-6 py-3 rounded-xl text-base font-medium flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-red-600 hover:-translate-y-1">
-            <i class="fas fa-trash-alt btn-icon mr-2"></i>清除所有資訊
-          </button>
-          <button id="deleteSelectedButton" class="btn bg-amber-500 text-white px-6 py-3 rounded-xl text-base font-medium flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-amber-600 hover:-translate-y-1">
-            <i class="fas fa-minus-circle btn-icon mr-2"></i>刪除選中訂單
+        </form>
+      </div>
+
+      <div class="card glass-effect" style="--animation-order: 2">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-clipboard-list"></i></div>
+          <h2 class="card-title">今日菜單</h2>
+        </div>
+        <div class="menu-container">
+          <div class="menu-image">
+            <img id="menuImage" src="" alt="今日菜單" />
+          </div>
+        </div>
+        <div class="menu-controls">
+          <div class="file-upload">
+            <button id="changeImageButton" class="btn btn-secondary">
+              <i class="fas fa-upload btn-icon"></i>上傳菜單
+            </button>
+            <input type="file" id="fileInput" style="display: none;">
+          </div>
+          <select id="imageSelector" class="form-select">
+            <option value="">選擇已有菜單</option>
+          </select>
+          <button id="deleteMenuButton" class="btn btn-danger">
+            <i class="fas fa-trash-alt btn-icon"></i>刪除菜單
           </button>
         </div>
       </div>
     </div>
+
+    <div class="card glass-effect" style="--animation-order: 3">
+      <div class="card-header">
+        <div class="card-icon"><i class="fas fa-list-alt"></i></div>
+        <h2 class="card-title">今日訂單</h2>
+      </div>
+
+      <div class="table-responsive">
+        <table id="orderTable">
+          <thead>
+            <tr>
+              <th class="checkbox-cell"></th>
+              <th class="number-cell">No.</th>
+              <th>已納費</th>
+              <th>姓名</th>
+              <th>餐點</th>
+              <th>價格</th>
+              <th>訂購時間</th>
+              <th>備註</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="total-section">
+        <div id="totalPrice" class="glass-effect">總價格: $0.00</div>
+      </div>
+
+      <div class="actions-section">
+        <button id="exportButton" class="btn btn-primary">
+          <i class="fas fa-file-export btn-icon"></i>導出訂單為 Excel
+        </button>
+        <button id="clearButton" class="btn btn-danger">
+          <i class="fas fa-trash-alt btn-icon"></i>清除所有資訊
+        </button>
+        <button id="deleteSelectedButton" class="btn btn-secondary">
+          <i class="fas fa-minus-circle btn-icon"></i>刪除選中訂單
+        </button>
+      </div>
+    </div>
   </div>
   
+  <!-- 通知容器 -->
   <div class="toast-container"></div>
   
+  <!-- 全螢幕顯示菜單容器 -->
   <div id="fullscreenOverlay" class="fullscreen-overlay">
     <img id="fullscreenImage" class="fullscreen-image" src="" alt="全螢幕菜單" />
     <div id="closeFullscreen" class="close-fullscreen">
@@ -407,695 +685,642 @@
     </div>
   </div>
 
-  <script type="module">
-    // Firebase 模組化導入
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
-
-    // Firebase 配置
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOBza8v4DoSna4Fg6hjWrHO0biq0iDRNo",
-      authDomain: "drink-c4d22.firebaseapp.com",
-      projectId: "drink-c4d22",
-      storageBucket: "drink-c4d22.appspot.com",
-      messagingSenderId: "688183350540",
-      appId: "1:688183350540:web:29216ea997ffbadca1e529",
-      measurementId: "G-XCJINXZ5PB"
-    };
-
-    // 初始化 Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    // 全局變數
-    let currentDay = ''; // 用於儲存當前選擇的星期
-    let currentMenuRef = null; // 用於儲存當前菜單的 Firestore 文件參考
-
-    // DOM 元素
-    const weeklyMenuPage = document.getElementById('weeklyMenuPage');
-    const orderSystemPage = document.getElementById('orderSystemPage');
-    const backToWeeklyMenuButton = document.getElementById('backToWeeklyMenu');
-    const orderForm = document.getElementById('orderForm');
-    const orderTableBody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
-    const totalPriceDisplay = document.getElementById('totalPrice');
-    const menuImage = document.getElementById('menuImage');
-    const imageSelector = document.getElementById('imageSelector');
-    const fileInput = document.getElementById('fileInput');
-    const changeImageButton = document.getElementById('changeImageButton');
-    const deleteMenuButton = document.getElementById('deleteMenuButton');
-    const exportButton = document.getElementById('exportButton');
-    const clearButton = document.getElementById('clearButton');
-    const deleteSelectedButton = document.getElementById('deleteSelectedButton');
-    const fullscreenOverlay = document.getElementById('fullscreenOverlay');
-    const fullscreenImage = document.getElementById('fullscreenImage');
-    const closeFullscreenButton = document.getElementById('closeFullscreen');
-    const toastContainer = document.querySelector('.toast-container');
-
-    // 頁面初始化
-    document.addEventListener('DOMContentLoaded', () => {
-      updateDateTime();
-      setInterval(updateDateTime, 60000); // 每分鐘更新一次時間
-
-      // 測試 Firebase 連接
-      testFirebaseConnection();
-
-      // 更新週菜單卡片顯示 (包含日期和今日標記)
-      updateDayCardsDisplay();
-
-      // 為每個星期卡片添加事件監聽器
-      document.querySelectorAll('.day-card').forEach(card => {
-        card.addEventListener('click', () => {
-          currentDay = card.dataset.day; // 設置當前選擇的星期
-          showOrderSystemPage();
-          loadOrdersFromDatabase(currentDay); // 載入該星期的訂單
-          loadImageSelector(currentDay); // 載入該星期的菜單圖片
-        });
-      });
-
-      // 返回週菜單按鈕事件
-      backToWeeklyMenuButton.addEventListener('click', showWeeklyMenuPage);
-
-      // 訂單表單提交
-      orderForm.addEventListener('submit', handleOrderFormSubmit);
-
-      // 菜單圖片操作
-      changeImageButton.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', handleFileUpload);
-      imageSelector.addEventListener('change', handleImageSelection);
-      deleteMenuButton.addEventListener('click', handleDeleteMenu);
-
-      // 訂單操作
-      exportButton.addEventListener('click', handleExportOrders);
-      clearButton.addEventListener('click', handleClearAllOrders);
-      deleteSelectedButton.addEventListener('click', handleDeleteSelectedOrders);
-
-      // 全螢幕菜單顯示
-      menuImage.addEventListener('click', handleMenuImageClick);
-      closeFullscreenButton.addEventListener('click', closeFullscreen);
-      fullscreenOverlay.addEventListener('click', (e) => {
-        if (e.target === fullscreenOverlay) closeFullscreen();
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && fullscreenOverlay.classList.contains('active')) {
-          closeFullscreen();
-        }
-      });
+  <script>
+    // 先檢查 Firebase 是否已經載入
+    document.addEventListener('DOMContentLoaded', function() {
+      // 確保 Firebase SDK 已經載入
+      if (typeof firebase === 'undefined') {
+        console.error("Firebase SDK not loaded. Attempting to reload scripts...");
+        loadFirebaseScripts();
+      } else {
+        initializeApp();
+      }
     });
 
-    /**
-     * 更新週菜單卡片的顯示，包括日期和今日標記
-     */
-    function updateDayCardsDisplay() {
-      const daysOfWeekNames = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-      const dayNameToIndex = {
-          'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
-          'thursday': 4, 'friday': 5, 'saturday': 6
-      };
-
-      const today = new Date();
-      const currentDayIndex = today.getDay(); // 0 for Sunday, 1 for Monday...
-
-      document.querySelectorAll('.day-card').forEach(card => {
-          const cardDayKey = card.dataset.day; // e.g., 'monday'
-          const cardDayIndex = dayNameToIndex[cardDayKey]; // e.g., 1 for 'monday'
-
-          // 只處理星期一到星期五的卡片
-          if (cardDayIndex >= 1 && cardDayIndex <= 5) {
-              card.style.display = 'flex'; // 確保這些卡片顯示
-              const dateForCard = new Date(today);
-              dateForCard.setDate(today.getDate() + (cardDayIndex - currentDayIndex));
-
-              const options = { month: '2-digit', day: '2-digit' };
-              const formattedDate = dateForCard.toLocaleDateString('zh-TW', options);
-
-              // 更新卡片內容
-              card.querySelector('.day-card-title').textContent = daysOfWeekNames[cardDayIndex];
-              let dateElement = card.querySelector('.day-card-date');
-              // 如果日期元素不存在，則創建它
-              if (!dateElement) {
-                  dateElement = document.createElement('p');
-                  dateElement.classList.add('day-card-date'); // 添加日期樣式類別
-                  card.insertBefore(dateElement, card.querySelector('.day-card-subtitle'));
-              }
-              dateElement.textContent = `(${formattedDate})`;
-
-              // 標記今天的卡片
-              if (cardDayIndex === currentDayIndex) {
-                  card.classList.add('today-card');
-              } else {
-                  card.classList.remove('today-card');
-              }
-          } else {
-              card.style.display = 'none'; // 隱藏星期六和星期日的卡片
+    // 載入 Firebase 腳本
+    function loadFirebaseScripts() {
+      const scripts = [
+        "https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js",
+        "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js",
+        "https://www.gstatic.com/firebasejs/9.1.3/firebase-storage-compat.js"
+      ];
+      
+      let scriptsLoaded = 0;
+      scripts.forEach(src => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = () => {
+          scriptsLoaded++;
+          if (scriptsLoaded === scripts.length) {
+            console.log("All Firebase scripts loaded. Initializing app...");
+            setTimeout(initializeApp, 500); // 給 Firebase 一點時間初始化
           }
+        };
+        script.onerror = () => {
+          console.error(`Failed to load script: ${src}`);
+        };
+        document.head.appendChild(script);
       });
     }
 
-    /**
-     * 測試 Firebase Firestore 和 Storage 連接
-     */
-    async function testFirebaseConnection() {
+    // 初始化應用程序
+    function initializeApp() {
       try {
-        await addDoc(collection(db, "test"), { timestamp: new Date().toISOString(), test: "connection" });
-        console.log("Firestore 連接正常");
+        console.log("開始初始化 Firebase...");
+        // Firebase 配置 - 保持原有的配置
+        const firebaseConfig = {
+          apiKey: "AIzaSyBOBza8v4DoSna4Fg6hjWrHO0biq0iDRNo",
+          authDomain: "drink-c4d22.firebaseapp.com",
+          projectId: "drink-c4d22",
+          storageBucket: "drink-c4d22.appspot.com",
+          messagingSenderId: "688183350540",
+          appId: "1:688183350540:web:29216ea997ffbadca1e529",
+          measurementId: "G-XCJINXZ5PB"
+        };
+        
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+          console.log("Firebase 應用已初始化");
+        } else {
+          console.log("Firebase 應用已存在");
+        }
+        
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        
+        // 測試連接
+        console.log("測試 Firestore 連接...");
+        db.collection("test").doc("connection").set({
+          timestamp: new Date().toISOString(),
+          test: "connection"
+        }).then(() => {
+          console.log("Firestore 連接正常");
+        }).catch(err => {
+          console.error("Firestore 連接測試失敗:", err);
+        });
+        
+        console.log("測試 Storage 連接...");
+        storage.ref().child("test").listAll().then(() => {
+          console.log("Storage 連接正常");
+        }).catch(err => {
+          console.error("Storage 連接測試失敗:", err);
+        });
+        
+        // 設置全局變數以便其他函數使用
+        window.db = db;
+        window.storage = storage;
+        
+        // 初始化頁面
+        updateDateTime();
+        console.log("日期時間已更新");
+        
+        // 先載入訂單，再載入菜單
+        loadOrdersFromDatabase();
+        console.log("訂單載入中...");
+        
+        // 延遲加載菜單以確保 Firebase 準備就緒
+        setTimeout(() => {
+          console.log("開始載入菜單選項...");
+          loadImageSelector();
+        }, 1000);
+        
+        setInterval(updateDateTime, 60000);
+        
+        console.log("Firebase 初始化成功");
         showToast('系統初始化成功', 'success');
       } catch (error) {
-        console.error("Firestore 連接測試失敗:", error);
-        showToast('系統初始化失敗，請刷新頁面重試', 'error');
-      }
-
-      try {
-        await listAll(ref(storage, "test"));
-        console.log("Storage 連接正常");
-      } catch (error) {
-        console.error("Storage 連接測試失敗:", error);
+        console.error("Firebase 初始化錯誤:", error);
+        alert("系統初始化失敗，請刷新頁面重試。錯誤: " + error.message);
       }
     }
 
-    /**
-     * 顯示通知訊息
-     * @param {string} message - 通知內容
-     * @param {string} type - 通知類型 ('success', 'error', 'warning')
-     */
+    // 顯示通知
     function showToast(message, type = 'success') {
+      const toastContainer = document.querySelector('.toast-container');
+      
+      // 創建一個通知元素
       const toast = document.createElement('div');
-      toast.className = `toast rounded-2xl shadow-lg ${type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-red-500' : 'bg-amber-500'} bg-opacity-90`;
-      toast.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'} toast-icon"></i>
-        <span>${message}</span>
-      `;
+      toast.className = 'toast';
+      
+      // 設定顏色
+      if (type === 'success') {
+        toast.style.backgroundColor = 'rgba(152, 201, 178, 0.9)';
+        toast.innerHTML = `<i class="fas fa-check-circle toast-icon"></i>${message}`;
+      } else if (type === 'error') {
+        toast.style.backgroundColor = 'rgba(229, 152, 155, 0.9)';
+        toast.innerHTML = `<i class="fas fa-exclamation-circle toast-icon"></i>${message}`;
+      } else if (type === 'warning') {
+        toast.style.backgroundColor = 'rgba(246, 193, 119, 0.9)';
+        toast.innerHTML = `<i class="fas fa-exclamation-triangle toast-icon"></i>${message}`;
+      }
+      
+      // 添加到容器
       toastContainer.appendChild(toast);
-
+      
+      // 顯示通知
       setTimeout(() => {
         toast.style.animation = 'slideIn 0.3s forwards';
       }, 10);
-
+      
+      // 幾秒後隱藏通知
       setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s forwards';
-        setTimeout(() => toastContainer.removeChild(toast), 300);
+        setTimeout(() => {
+          toastContainer.removeChild(toast);
+        }, 300);
       }, 3000);
     }
 
-    /**
-     * 更新日期時間顯示
-     */
+    // 更新日期時間
     function updateDateTime() {
       const now = new Date();
       const dateTimeString = now.toLocaleString('zh-TW', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', hour12: false
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
       });
       document.getElementById('datetime').textContent = dateTimeString;
     }
 
-    /**
-     * 顯示訂單系統頁面
-     */
-    function showOrderSystemPage() {
-      weeklyMenuPage.style.display = 'none';
-      orderSystemPage.classList.add('active');
-    }
+    // 以下函數使用全局 db 和 storage 變數
 
-    /**
-     * 顯示週菜單選擇頁面
-     */
-    function showWeeklyMenuPage() {
-      orderSystemPage.classList.remove('active');
-      weeklyMenuPage.style.display = 'grid';
-      currentDay = ''; // 清空當前選擇的星期
-      // 清空訂單表格和菜單圖片
-      orderTableBody.innerHTML = '';
-      totalPriceDisplay.textContent = '總價格: $0.00';
-      menuImage.src = '';
-      imageSelector.innerHTML = '<option value="">選擇已有菜單</option>';
-      updateDayCardsDisplay(); // 返回週菜單頁面時重新更新卡片顯示
-    }
-
-    /**
-     * 處理訂單表單提交
-     * @param {Event} e - 提交事件
-     */
-    async function handleOrderFormSubmit(e) {
-      e.preventDefault();
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
+    // 新增訂單到資料庫
+    function addOrderToDatabase(order) {
+      if (!window.db) {
+        showToast('系統尚未完全初始化，請稍後再試', 'error');
         return;
       }
 
-      const name = this.elements['name'].value;
-      const meal = this.elements['meal'].value;
-      const price = parseFloat(this.elements['price'].value);
-      const note = this.elements['note'].value;
-      const timestamp = Date.now();
-
-      try {
-        await addDoc(collection(db, `orders_${currentDay}`), { name, meal, price, note, timestamp, paid: false });
-        loadOrdersFromDatabase(currentDay);
-        orderForm.reset();
+      window.db.collection("orders").add(order).then(() => {
+        loadOrdersFromDatabase();
+        document.getElementById('orderForm').reset();
         showToast('訂單已成功提交！');
-      } catch (error) {
+      }).catch((error) => {
         console.error("Error adding order: ", error);
         showToast('訂單提交失敗，請稍後再試', 'error');
-      }
+      });
     }
 
-    /**
-     * 從資料庫載入訂單並更新表格
-     * @param {string} day - 星期 (e.g., 'monday')
-     */
-    async function loadOrdersFromDatabase(day) {
-      if (!day) return;
-      try {
-        const querySnapshot = await getDocs(collection(db, `orders_${day}`));
+    // 處理表單提交
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('orderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = this.elements['name'].value;
+        const meal = this.elements['meal'].value;
+        const price = parseFloat(this.elements['price'].value);
+        const note = this.elements['note'].value;
+        const timestamp = Date.now();
+
+        addOrderToDatabase({ name, meal, price, note, timestamp, paid: false });
+      });
+    });
+
+    // 更新納費狀態
+    function updatePaymentStatus(orderId, paid) {
+      if (!window.db) {
+        showToast('系統尚未完全初始化，請稍後再試', 'error');
+        return;
+      }
+
+      window.db.collection("orders").doc(orderId).update({
+        paid: paid
+      }).then(() => {
+        console.log("Payment status updated.");
+        showToast(paid ? '已標記為已納費' : '已標記為未納費');
+      }).catch((error) => {
+        console.error("Error updating payment status: ", error);
+        showToast('狀態更新失敗', 'error');
+      });
+    }
+
+    // 納費確認
+    function confirmPayment(checkbox, orderId) {
+      if (confirm('是否確定已經納費?')) {
+        checkbox.checked = true;
+        updatePaymentStatus(orderId, true);
+      } else {
+        checkbox.checked = false;
+        updatePaymentStatus(orderId, false);
+      }
+    }
+    // 全局使其可用
+    window.confirmPayment = confirmPayment;
+
+    // 從資料庫載入訂單
+    function loadOrdersFromDatabase() {
+      if (!window.db) {
+        console.warn("Database not initialized yet");
+        return;
+      }
+
+      window.db.collection("orders").get().then((querySnapshot) => {
         const orders = [];
         querySnapshot.forEach((doc) => {
           orders.push({ id: doc.id, ...doc.data() });
         });
-        orders.sort((a, b) => b.timestamp - a.timestamp); // 按時間降序排序
+        orders.sort((a, b) => b.timestamp - a.timestamp);
         updateOrderTable(orders);
-      } catch (error) {
+      }).catch((error) => {
         console.error("Error getting orders: ", error);
         showToast('載入訂單失敗', 'error');
-      }
+      });
     }
 
-    /**
-     * 更新訂單表格顯示
-     * @param {Array<Object>} orders - 訂單數據陣列
-     */
+    // 更新訂單表格
     function updateOrderTable(orders) {
-      orderTableBody.innerHTML = '';
+      const tbody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = '';
       let totalPrice = 0;
       orders.forEach((order, index) => {
-        const row = orderTableBody.insertRow();
+        const row = tbody.insertRow();
         const orderDate = new Date(order.timestamp);
         const dateTimeString = orderDate.toLocaleString('zh-TW', {
-          year: 'numeric', month: '2-digit', day: '2-digit',
-          hour: '2-digit', minute: '2-digit', hour12: false
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
         });
         
-        row.classList.add('bg-white', 'transition-all', 'duration-300', 'ease-in-out', 'hover:bg-gray-100');
+        // 根據納費狀態設置行樣式
         if (order.paid) {
-          row.classList.add('bg-green-50', 'hover:bg-green-100'); // 已納費行樣式
+          row.classList.add('paid-row');
         }
         
         row.innerHTML = `
-          <td class="px-4 py-3 border-b border-gray-200 text-center"><input type="checkbox" data-id="${order.id}" class="form-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"></td>
-          <td class="px-4 py-3 border-b border-gray-200 text-center text-gray-700">${index + 1}</td>
-          <td class="px-4 py-3 border-b border-gray-200 text-center">
-            <input type="checkbox" class="paid-checkbox h-5 w-5 text-emerald-500 rounded focus:ring-emerald-500" ${order.paid ? 'checked' : ''} onclick="confirmPayment(this, '${order.id}')" />
+          <td class="checkbox-cell"><input type="checkbox" data-id="${order.id}"></td>
+          <td class="number-cell">${index + 1}</td>
+          <td class="checkbox-container">
+            <input type="checkbox" class="paid-checkbox" ${order.paid ? 'checked' : ''} onclick="confirmPayment(this, '${order.id}')" />
           </td>
-          <td class="px-4 py-3 border-b border-gray-200 text-gray-700">${order.name}</td>
-          <td class="px-4 py-3 border-b border-gray-200 text-gray-700">${order.meal}</td>
-          <td class="px-4 py-3 border-b border-gray-200 text-gray-700">$${order.price.toFixed(2)}</td>
-          <td class="px-4 py-3 border-b border-gray-200 text-gray-700">${dateTimeString}</td>
-          <td class="px-4 py-3 border-b border-gray-200 text-gray-700">${order.note || '-'}</td>
+          <td>${order.name}</td>
+          <td>${order.meal}</td>
+          <td>$${order.price.toFixed(2)}</td>
+          <td>${dateTimeString}</td>
+          <td>${order.note || '-'}</td>
         `;
         totalPrice += order.price;
       });
-      totalPriceDisplay.textContent = `總價格: $${totalPrice.toFixed(2)}`;
+      document.getElementById('totalPrice').textContent = `總價格: $${totalPrice.toFixed(2)}`;
     }
 
-    /**
-     * 更新納費狀態
-     * @param {HTMLInputElement} checkbox - 納費勾選框
-     * @param {string} orderId - 訂單 ID
-     */
-    window.confirmPayment = async function(checkbox, orderId) {
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
-        checkbox.checked = !checkbox.checked; // 恢復原狀
+    // 載入圖片選單與當前菜單圖片
+    function loadImageSelector() {
+      if (!window.storage || !window.db) {
+        console.warn("Storage or database not initialized yet");
+        setTimeout(loadImageSelector, 1000); // 延遲重試
         return;
       }
 
-      const confirmed = confirm('是否確定已經納費?');
-      if (confirmed) {
-        try {
-          await updateDoc(doc(db, `orders_${currentDay}`, orderId), { paid: true });
-          showToast('已標記為已納費');
-          loadOrdersFromDatabase(currentDay); // 重新載入以更新表格樣式
-        } catch (error) {
-          console.error("Error updating payment status: ", error);
-          showToast('狀態更新失敗', 'error');
-          checkbox.checked = false; // 恢復原狀
-        }
-      } else {
-        try {
-          await updateDoc(doc(db, `orders_${currentDay}`, orderId), { paid: false });
-          showToast('已標記為未納費');
-          loadOrdersFromDatabase(currentDay); // 重新載入以更新表格樣式
-        } catch (error) {
-          console.error("Error updating payment status: ", error);
-          showToast('狀態更新失敗', 'error');
-          checkbox.checked = true; // 恢復原狀
-        }
-      }
-    };
-
-    /**
-     * 載入菜單圖片選單和當前菜單圖片
-     * @param {string} day - 星期 (e.g., 'monday')
-     */
-    async function loadImageSelector(day) {
-      if (!day) return;
-
+      console.log("開始載入菜單選項...");
+      const imageSelector = document.getElementById('imageSelector');
       imageSelector.innerHTML = '<option value="">選擇已有菜單</option>';
-      menuImage.src = ''; // 清空當前圖片
 
-      console.log(`[DEBUG] Attempting to load images for day: ${day}`);
-
-      try {
-        // 獲取 Storage 中該星期的所有菜單圖片
-        const menuListRef = ref(storage, `menu/${day}`);
-        console.log(`[DEBUG] Storage reference path: menu/${day}`);
-        const result = await listAll(menuListRef);
+      // 改進的方式載入圖片選項
+      window.storage.ref('menu').listAll().then((result) => {
+        console.log("發現菜單數量:", result.items.length);
         
+        // 如果沒有菜單項目，顯示提示
         if (result.items.length === 0) {
-          showToast('目前沒有可用的菜單圖片', 'warning');
-          console.log(`[DEBUG] No images found in storage for menu/${day}`);
+          showToast('目前沒有可用的菜單', 'warning');
+          return;
         }
-
-        const menuItems = await Promise.all(result.items.map(async (imageRef) => {
-          try {
-            const url = await getDownloadURL(imageRef);
-            console.log(`[DEBUG] Fetched URL for ${imageRef.name}: ${url}`);
+        
+        // 創建一個 Promise 數組來跟踪所有加載操作
+        const promises = result.items.map(imageRef => {
+          return imageRef.getDownloadURL().then(url => {
+            console.log("已載入菜單項目:", imageRef.name);
             const option = document.createElement('option');
             option.value = url;
             option.textContent = imageRef.name;
             imageSelector.appendChild(option);
             return { url, name: imageRef.name };
-          } catch (err) {
-            console.error(`[DEBUG] 無法載入菜單項目: ${imageRef.name}`, err);
+          }).catch(err => {
+            console.error("無法載入菜單項目:", imageRef.name, err);
             return null;
-          }
-        }));
-
-        // 獲取 Firestore 中該星期的當前菜單圖片 URL
-        currentMenuRef = doc(db, "dailyMenus", day);
-        console.log(`[DEBUG] Firestore document reference for current menu: dailyMenus/${day}`);
-        const docSnap = await getDoc(currentMenuRef);
-
-        if (docSnap.exists() && docSnap.data() && docSnap.data().url) {
-          const currentUrl = docSnap.data().url;
-          console.log(`[DEBUG] Current menu URL from Firestore for ${day}: ${currentUrl}`);
-          menuImage.src = currentUrl;
-          imageSelector.value = currentUrl;
-        } else {
-          console.warn(`[DEBUG] 沒有為 ${day} 設置當前菜單。文件存在: ${docSnap.exists()}`);
-          menuImage.src = ''; // Ensure image is cleared if no URL
-          imageSelector.value = ''; // Clear selector if no URL
-        }
-      } catch (error) {
-        console.error("[DEBUG] 載入菜單列表失敗:", error);
-        showToast('載入菜單圖片失敗', 'error');
-      }
-    }
-
-    /**
-     * 處理菜單圖片選擇
-     */
-    async function handleImageSelection() {
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
-        imageSelector.value = ''; // 重置選擇器
-        return;
-      }
-
-      const imageUrl = imageSelector.value;
-      if (imageUrl) {
-        const password = prompt('輸入密碼以更換圖片：');
-        if (password === '0841') {
-          const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
-          if (confirmChange) {
-            menuImage.src = imageUrl;
-            try {
-              await updateDoc(currentMenuRef, { url: imageUrl, updatedAt: new Date().toISOString() });
-              showToast('菜單已更新');
-            } catch (error) {
-              console.error("更新菜單URL失敗:", error);
-              showToast('菜單更新失敗', 'error');
-            }
-          } else {
-            imageSelector.value = menuImage.src || ''; // 取消選擇，恢復原狀
-          }
-        } else {
-          alert('密碼錯誤，無法更換圖片。');
-          imageSelector.value = menuImage.src || ''; // 密碼錯誤，恢復原狀
-        }
-      }
-    }
-
-    /**
-     * 處理文件上傳
-     * @param {Event} event - 文件上傳事件
-     */
-    async function handleFileUpload(event) {
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
-        return;
-      }
-
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const password = prompt('請輸入密碼以上傳圖片：');
-      if (password !== '0841') {
-        alert('密碼錯誤，無法上傳圖片。');
-        return;
-      }
-
-      showToast('正在上傳圖片...', 'warning');
-
-      const storageRef = ref(storage, `menu/${currentDay}/${file.name}`);
-      console.log(`[DEBUG] Attempting to upload file: ${file.name} for day: ${currentDay}`);
-      console.log(`[DEBUG] Upload storage reference path: menu/${currentDay}/${file.name}`);
-
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Upload is ' + progress + '% done');
-        },
-        (error) => {
-          console.error("[DEBUG] Error uploading file: ", error);
-          showToast('圖片上傳失敗', 'error');
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            menuImage.src = downloadURL;
-            console.log(`[DEBUG] File uploaded successfully. Download URL: ${downloadURL}`);
-            
-            // 確保 currentMenuRef 已被正確設置
-            if (!currentMenuRef) {
-                currentMenuRef = doc(db, "dailyMenus", currentDay);
-                console.log(`[DEBUG] Initializing currentMenuRef for dailyMenus/${currentDay}`);
-            }
-            console.log(`[DEBUG] Updating Firestore document dailyMenus/${currentDay} with URL: ${downloadURL}`);
-            await updateDoc(currentMenuRef, { url: downloadURL, updatedAt: new Date().toISOString() });
-            
-            // 更新選擇器
-            const option = document.createElement('option');
-            option.value = downloadURL;
-            option.textContent = file.name;
-            imageSelector.appendChild(option);
-            imageSelector.value = downloadURL;
-
-            showToast('圖片上傳成功！');
-          } catch (error) {
-            console.error("[DEBUG] Error updating image URL in Firestore: ", error);
-            showToast('更新菜單圖片URL失敗', 'error');
-          }
-        }
-      );
-    }
-
-    /**
-     * 處理刪除菜單圖片
-     */
-    async function handleDeleteMenu() {
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
-        return;
-      }
-
-      const selectedOption = imageSelector.options[imageSelector.selectedIndex];
-      if (!selectedOption || !selectedOption.value) {
-        alert('請先從下拉選單中選擇一個菜單後再刪除');
-        return;
-      }
-      
-      const imageName = selectedOption.textContent;
-
-      if (confirm(`確定要刪除菜單 "${imageName}" 嗎？`)) {
-        const password = prompt('請輸入密碼以刪除菜單：');
-        if (password === '0841') {
-          try {
-            const imageRef = ref(storage, `menu/${currentDay}/${imageName}`);
-            await deleteObject(imageRef);
-
-            // 如果被刪除的是當前顯示的菜單，則清空顯示並更新 Firestore
-            if (imageSelector.value === menuImage.src) {
-              menuImage.src = '';
-              // 確保 currentMenuRef 已被正確設置
-              if (!currentMenuRef) {
-                  currentMenuRef = doc(db, "dailyMenus", currentDay);
-              }
-              await updateDoc(currentMenuRef, { url: '' }); // 清空 Firestore 中的 URL
-            }
-            
-            imageSelector.remove(imageSelector.selectedIndex);
-            showToast(`菜單 "${imageName}" 已成功刪除`);
-          } catch (error) {
-            console.error("Error deleting menu: ", error);
-            showToast('刪除菜單失敗', 'error');
-          }
-        } else {
-          alert('密碼錯誤，無法刪除菜單。');
-        }
-      }
-    }
-
-    /**
-     * 導出訂單為 CSV
-     */
-    function handleExportOrders() {
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
-        return;
-      }
-
-      const table = document.getElementById('orderTable');
-      let csvContent = "﻿"; // BOM for UTF-8
-
-      // 加入表頭
-      const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
-      csvContent += headers.join(',') + "\n";
-
-      // 加入各行資料
-      const rows = table.querySelectorAll('tbody tr');
-      rows.forEach(row => {
-        const rowData = Array.from(row.cells).map((cell, index) => {
-          // 特殊處理已納費欄位
-          if (index === 2) {
-            const checkbox = cell.querySelector('input[type="checkbox"]');
-            return `"${checkbox && checkbox.checked ? '已繳費' : '尚未繳費'}"`;
-          } else {
-            return `"${cell.textContent.replace(/"/g, '""')}"`;
-          }
+          });
         });
-        csvContent += rowData.join(',') + "\n";
+        
+        // 等待所有項目加載完成
+        return Promise.all(promises);
+      }).then(menuItems => {
+        if (menuItems && menuItems.length > 0) {
+          console.log("所有菜單項目載入完成，共", menuItems.filter(Boolean).length, "個");
+          
+          // 加載當前菜單圖片
+          return window.db.collection("images").doc("menuImage").get().then((doc) => {
+            if (doc.exists && doc.data() && doc.data().url) {
+              const currentUrl = doc.data().url;
+              console.log("當前菜單URL:", currentUrl);
+              
+              const menuImage = document.getElementById('menuImage');
+              menuImage.src = currentUrl;
+              
+              // 設置選擇器的值
+              const imageSelector = document.getElementById('imageSelector');
+              imageSelector.value = currentUrl;
+              
+              // 標記已選擇的項目
+              const validMenuItems = menuItems.filter(Boolean);
+              const found = validMenuItems.find(item => item.url === currentUrl);
+              if (found) {
+                console.log("已選中菜單:", found.name);
+              } else {
+                console.log("當前菜單不在列表中");
+              }
+            } else {
+              console.log("沒有當前菜單設置");
+            }
+          });
+        }
+      }).catch((error) => {
+        console.error("載入菜單列表失敗:", error);
+        showToast('載入菜單圖片失敗', 'error');
+      });
+    }
+
+    // 設定事件監聽
+    document.addEventListener('DOMContentLoaded', function() {
+      // 當圖片選單變更時
+      document.getElementById('imageSelector').addEventListener('change', function() {
+        if (!window.db) {
+          showToast('系統尚未初始化完成，請稍後再試', 'error');
+          return;
+        }
+        
+        const imageUrl = this.value;
+        if (imageUrl) {
+          console.log("選擇菜單URL:", imageUrl);
+          
+          const password = prompt('輸入密碼以更換圖片：');
+          if (password === '0841') {
+            const confirmChange = confirm(`確定要更換為選擇的圖片嗎？`);
+            if (confirmChange) {
+              // 先更新圖片顯示
+              const menuImage = document.getElementById('menuImage');
+              menuImage.src = imageUrl;
+              console.log("已更新菜單顯示");
+              
+              // 再更新資料庫
+              window.db.collection("images").doc("menuImage").set({ 
+                url: imageUrl,
+                updatedAt: new Date().toISOString()
+              }).then(() => {
+                console.log("資料庫菜單記錄已更新");
+                showToast('菜單已更新');
+              }).catch((error) => {
+                console.error("更新菜單URL失敗:", error);
+                showToast('菜單更新失敗', 'error');
+              });
+            } else {
+              console.log("使用者取消變更");
+              this.value = document.getElementById('menuImage').src || '';
+            }
+          } else {
+            alert('密碼錯誤，無法更換圖片。');
+            this.value = document.getElementById('menuImage').src || '';
+          }
+        }
+      });
+      
+      // 刪除菜單功能
+      document.getElementById('deleteMenuButton').addEventListener('click', function() {
+        if (!window.storage) return;
+        
+        const imageSelector = document.getElementById('imageSelector');
+        const selectedOption = imageSelector.options[imageSelector.selectedIndex];
+        
+        if (!selectedOption || !selectedOption.value) {
+          alert('請先從下拉選單中選擇一個菜單後再刪除');
+          return;
+        }
+        
+        const imageName = selectedOption.textContent;
+        
+        if (confirm(`確定要刪除菜單 "${imageName}" 嗎？`)) {
+          const password = prompt('請輸入密碼以刪除菜單：');
+          if (password === '0841') {
+            // 從 Storage 中刪除文件
+            const imageRef = window.storage.ref(`menu/${imageName}`);
+            
+            imageRef.delete().then(() => {
+              // 如果被刪除的是當前顯示的菜單，則清空顯示
+              if (imageSelector.value === document.getElementById('menuImage').src) {
+                document.getElementById('menuImage').src = '';
+                window.db.collection("images").doc("menuImage").set({ url: '' });
+              }
+              
+              // 從選擇器中移除選項
+              imageSelector.remove(imageSelector.selectedIndex);
+              showToast(`菜單 "${imageName}" 已成功刪除`);
+            }).catch((error) => {
+              console.error("Error deleting menu: ", error);
+              showToast('刪除菜單失敗', 'error');
+            });
+          } else {
+            alert('密碼錯誤，無法刪除菜單。');
+          }
+        }
       });
 
-      // 加入總價格
-      csvContent += `"","","","","",${totalPriceDisplay.textContent}\n`;
+      // 導出訂單為 Excel (CSV)
+      document.getElementById('exportButton').addEventListener('click', function() {
+        const table = document.getElementById('orderTable');
+        let csvContent = "﻿"; // BOM for UTF-8
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `lunch_orders_${currentDay}_${new Date().toISOString().slice(0, 10)}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        showToast('訂單已導出為 Excel 檔案');
-      }
-    }
+        // 加入表頭
+        const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
+        csvContent += headers.join(',') + "\n";
 
-    /**
-     * 清除所有訂單資訊
-     */
-    async function handleClearAllOrders() {
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
-        return;
-      }
+        // 加入各行資料
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const rowData = Array.from(row.cells).map((cell, index) => {
+            // 特殊處理已納費欄位
+            if (index === 2) {
+              const checkbox = cell.querySelector('input[type="checkbox"]');
+              return `"${checkbox && checkbox.checked ? '已繳費' : '尚未繳費'}"`;
+            } else {
+              return `"${cell.textContent.replace(/"/g, '""')}"`;
+            }
+          });
+          csvContent += rowData.join(',') + "\n";
+        });
 
-      if (confirm('確定要刪除所有訂單資訊嗎？')) {
-        const password = prompt('請輸入密碼以刪除所有訂單：');
-        if (password === '0841') {
-          try {
-            const q = query(collection(db, `orders_${currentDay}`));
-            const querySnapshot = await getDocs(q);
-            const batch = writeBatch(db);
-            querySnapshot.forEach((doc) => {
-              batch.delete(doc.ref);
-            });
-            await batch.commit();
-            loadOrdersFromDatabase(currentDay);
-            showToast('所有訂單已清除');
-          } catch (error) {
-            console.error("Error clearing orders: ", error);
-            showToast('清除訂單失敗', 'error');
-          }
-        } else {
-          alert('密碼錯誤，無法清除資料。');
+        // 加入總價格
+        csvContent += `"","","","","",${document.getElementById('totalPrice').textContent}\n`;
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", `lunch_orders_${new Date().toISOString().slice(0, 10)}.csv`);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          showToast('訂單已導出為 Excel 檔案');
         }
-      }
-    }
+      });
 
-    /**
-     * 刪除選中的訂單
-     */
-    async function handleDeleteSelectedOrders() {
-      if (!currentDay) {
-        showToast('請先選擇一個星期！', 'error');
-        return;
-      }
+      // 清除所有訂單資訊
+      document.getElementById('clearButton').addEventListener('click', function() {
+        if (!window.db) return;
+        
+        if (confirm('確定要刪除所有訂單資訊嗎？')) {
+          const password = prompt('請輸入密碼以刪除所有訂單：');
+          if (password === '0841') {
+            window.db.collection("orders").get().then((querySnapshot) => {
+              const batch = window.db.batch();
+              querySnapshot.forEach((doc) => {
+                batch.delete(doc.ref);
+              });
+              return batch.commit();
+            }).then(() => {
+              loadOrdersFromDatabase();
+              showToast('所有訂單已清除');
+            }).catch((error) => {
+              console.error("Error clearing orders: ", error);
+              showToast('清除訂單失敗', 'error');
+            });
+          } else {
+            alert('密碼錯誤，無法清除資料。');
+          }
+        }
+      });
 
-      const checkboxes = document.querySelectorAll('#orderTable tbody input[type="checkbox"]:checked');
-      const ids = Array.from(checkboxes).map(checkbox => checkbox.getAttribute('data-id'));
+      // 刪除選中的訂單
+      document.getElementById('deleteSelectedButton').addEventListener('click', function() {
+        if (!window.db) return;
+        
+        const checkboxes = document.querySelectorAll('#orderTable tbody input[type="checkbox"]:checked');
+        const ids = Array.from(checkboxes).map(checkbox => checkbox.getAttribute('data-id'));
 
-      if (ids.length === 0) {
-        alert('請選擇要刪除的訂單。');
-        return;
-      }
+        if (ids.length === 0) {
+          alert('請選擇要刪除的訂單。');
+          return;
+        }
 
-      if (confirm(`確定要刪除選中的 ${ids.length} 筆訂單嗎？`)) {
-        const password = prompt('請輸入密碼以刪除選中的訂單：');
-        if (password === '0841') {
-          try {
-            const batch = writeBatch(db);
+        if (confirm(`確定要刪除選中的 ${ids.length} 筆訂單嗎？`)) {
+          const password = prompt('請輸入密碼以刪除選中的訂單：');
+          if (password === '0841') {
+            const batch = window.db.batch();
             ids.forEach(id => {
-              const docRef = doc(db, `orders_${currentDay}`, id);
+              const docRef = window.db.collection("orders").doc(id);
               batch.delete(docRef);
             });
-            await batch.commit();
-            loadOrdersFromDatabase(currentDay);
-            showToast(`已刪除 ${ids.length} 筆訂單`);
-          } catch (error) {
-            console.error("Error deleting orders: ", error);
-            showToast('刪除訂單失敗', 'error');
+            batch.commit().then(() => {
+              loadOrdersFromDatabase();
+              showToast(`已刪除 ${ids.length} 筆訂單`);
+            }).catch((error) => {
+              console.error("Error deleting orders: ", error);
+              showToast('刪除訂單失敗', 'error');
+            });
+          } else {
+            alert('密碼錯誤，無法刪除資料。');
           }
-        } else {
-          alert('密碼錯誤，無法刪除資料。');
         }
-      }
-    }
+      });
 
-    /**
-     * 處理菜單圖片點擊，顯示全螢幕
-     */
-    function handleMenuImageClick() {
-      if (menuImage.src) {
-        fullscreenImage.src = menuImage.src;
-        fullscreenOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // 防止背景滾動
-      }
-    }
+      // 文件上傳至 Firebase Storage
+      document.getElementById('changeImageButton').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+      });
 
-    /**
-     * 關閉全螢幕顯示
-     */
-    function closeFullscreen() {
-      fullscreenOverlay.classList.remove('active');
-      document.body.style.overflow = ''; // 恢復背景滾動
-    }
+      // 檔案選取後上傳
+      document.getElementById('fileInput').addEventListener('change', function(event) {
+        if (!window.storage || !window.db) return;
+        
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const password = prompt('請輸入密碼以上傳圖片：');
+        if (password !== '0841') {
+          alert('密碼錯誤，無法上傳圖片。');
+          return;
+        }
+
+        // 顯示上傳進度通知
+        showToast('正在上傳圖片...', 'warning');
+
+        const storageRef = window.storage.ref(`menu/${file.name}`);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+          },
+          (error) => {
+            console.error("Error uploading file: ", error);
+            showToast('圖片上傳失敗', 'error');
+          },
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              console.log('File available at', downloadURL);
+              document.getElementById('menuImage').src = downloadURL;
+              window.db.collection("images").doc("menuImage").set({ url: downloadURL }).then(() => {
+                const imageSelector = document.getElementById('imageSelector');
+                const option = document.createElement('option');
+                option.value = downloadURL;
+                option.textContent = file.name;
+                imageSelector.appendChild(option);
+
+                imageSelector.value = downloadURL;
+                showToast('圖片上傳成功！');
+              }).catch((error) => {
+                console.error("Error updating image URL: ", error);
+                showToast('更新菜單圖片URL失敗', 'error');
+              });
+            });
+          }
+        );
+      });
+      
+      // 全螢幕顯示菜單功能
+      document.getElementById('menuImage').addEventListener('click', function() {
+        if (this.src) {
+          const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+          const fullscreenImage = document.getElementById('fullscreenImage');
+          
+          fullscreenImage.src = this.src;
+          fullscreenOverlay.classList.add('active');
+          document.body.style.overflow = 'hidden'; // 防止背景滾動
+        }
+      });
+      
+      // 關閉全螢幕顯示
+      document.getElementById('closeFullscreen').addEventListener('click', function() {
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        fullscreenOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // 恢復背景滾動
+      });
+      
+      // 點擊背景也可以關閉全螢幕
+      document.getElementById('fullscreenOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+      
+      // 按ESC鍵也可以關閉全螢幕
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+          if (fullscreenOverlay.classList.contains('active')) {
+            fullscreenOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+      });
+    });
   </script>
 </body>
 </html>
